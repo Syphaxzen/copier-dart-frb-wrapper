@@ -1,0 +1,135 @@
+---
+name: update-{{ package_name }}
+description: Update {{ native_library_name }} native library version. Use when checking for updates, upgrading {{ native_library_name }}, bumping version, or updating native dependencies.
+---
+
+# Update {{ native_library_name }} Version
+
+Guide for updating the {{ native_library_name }} native library version in this project.
+
+## Quick Update (Automatic)
+
+```bash
+# Check for updates
+make check
+
+# Check and apply updates automatically
+make check ARGS="--update"
+```
+
+This will:
+1. Check GitHub for latest {{ native_library_name }} release
+2. Update `pubspec.yaml` with new `{{ package_name }}.native_version`
+
+## Manual Update Process
+
+### Step 1: Check Current Version
+
+```bash
+make version
+```
+
+Or check `pubspec.yaml`:
+```yaml
+{{ package_name }}:
+  native_version: "X.Y.Z"  # Current version
+```
+
+### Step 2: Update Version
+
+Edit `pubspec.yaml`:
+```yaml
+{{ package_name }}:
+  native_version: "X.Y.Z"  # New version
+```
+
+### Step 3: Regenerate FFI Bindings
+
+```bash
+make regen
+```
+
+This downloads the new {{ native_library_name }} headers and regenerates FFI bindings.
+
+### Step 4: Run Tests
+
+```bash
+make test
+```
+
+### Step 5: Commit Changes
+
+```bash
+git add pubspec.yaml lib/src/bindings/ CHANGELOG.md
+git commit -m "Update {{ native_library_name }} to X.Y.Z"
+git push
+```
+
+CI will automatically build native libraries for all platforms.
+
+## Check Options
+
+```bash
+# Just check (no changes)
+make check
+
+# Check and update
+make check ARGS="--update"
+
+# Update to specific version
+make check ARGS="--update --version X.Y.Z"
+
+# Force update even if already up to date
+make check ARGS="--update --force"
+
+# JSON output for CI
+make check ARGS="--ci"
+```
+
+## Version Locations
+
+Files automatically updated by `make check ARGS="--update"`:
+
+| File | What | Description |
+|------|------|-------------|
+| `pubspec.yaml` | native_version | Native library version |
+| `README.md` | Badge | Version badge in header |
+| `CLAUDE.md` | Example | Code example in documentation |
+| `.claude/skills/update-{{ package_name }}/SKILL.md` | Example | Code example in skill |
+
+Files that need manual update:
+
+| File | What | Description |
+|------|------|-------------|
+| `pubspec.yaml` | `version` | Dart package version (bump if needed) |
+| `CHANGELOG.md` | Entry | Document the version change |
+
+## After CI Builds
+
+When CI completes after pushing:
+
+1. Native libraries are built for all platforms
+2. Artifacts are combined
+3. SHA256 checksums created for verification
+4. GitHub Release created with assets
+
+## Troubleshooting
+
+### "No updates available"
+- You're already on the latest version
+- Check https://github.com/{{ github_repo }}/releases
+
+### "Binding generation failed"
+- New {{ native_library_name }} version may have breaking API changes
+- Check {{ native_library_name }} release notes
+- May need to update wrapper code in `lib/src/`
+
+### Tests fail after update
+- API may have changed
+- Check if function signatures changed
+- Review {{ native_library_name }} changelog for breaking changes
+
+## Upstream Resources
+
+- [{{ native_library_name }} Releases](https://github.com/{{ github_repo }}/releases)
+- [{{ native_library_name }} Repository](https://github.com/{{ github_repo }})

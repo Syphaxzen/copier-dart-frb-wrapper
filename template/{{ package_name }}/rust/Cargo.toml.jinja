@@ -1,0 +1,47 @@
+[package]
+name = "{{ crate_name }}"
+version = "1.0.0"
+edition = "{{ rust_edition }}"
+rust-version = "{{ rust_version }}"
+description = "{{ description }}"
+repository = "https://github.com/{{ github_repo }}"
+license = "{{ license }}"
+publish = false
+
+[lib]
+name = "{{ crate_name }}"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+flutter_rust_bridge = "={{ frb_version | replace('^', '') }}"
+thiserror = "2.0"
+log = "0.4"
+{% if upstream_crate %}
+
+{{ upstream_crate }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }
+{% endif %}
+{% if enable_web %}
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# Diamond dependency: some upstream crates use getrandom 0.2, some use 0.3
+# Both need to be configured for WASM to work correctly
+getrandom_02 = { package = "getrandom", version = "0.2", features = ["js"] }
+getrandom = { version = "0.3", features = ["wasm_js"] }
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["console", "Window", "Performance"] }
+{% endif %}
+
+[profile.release]
+lto = true
+opt-level = "z"
+strip = true
+{% if enable_web %}
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = ["-O4", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
+{% endif %}
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ["cfg(frb_expand)"] }

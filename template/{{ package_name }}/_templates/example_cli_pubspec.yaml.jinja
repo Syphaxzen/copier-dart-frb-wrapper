@@ -1,0 +1,13 @@
+name: {{ package_name }}_cli
+description: CLI example for {{ package_name }} package.
+publish_to: none
+
+environment:
+  sdk: {{ dart_sdk_version }}
+
+dependencies:
+  {{ package_name }}:
+    path: ../
+
+dev_dependencies:
+  lints: ^6.0.0

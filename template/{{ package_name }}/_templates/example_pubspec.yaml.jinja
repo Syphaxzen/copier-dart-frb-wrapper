@@ -1,0 +1,22 @@
+name: {{ package_name }}_example
+description: Interactive demo of the {{ package_name }} package.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: {{ dart_sdk_version }}
+  flutter: "{{ flutter_sdk_version }}"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  {{ package_name }}:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true

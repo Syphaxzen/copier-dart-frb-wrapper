@@ -1,0 +1,111 @@
+import 'package:{{ package_name }}/{{ package_name }}.dart';
+import 'package:test/test.dart';
+
+void main() {
+  group('{{ package_name | to_camel }}', () {
+    // =========================================================================
+    // Initialization tests
+    // =========================================================================
+    group('initialization', () {
+      tearDown(() {
+        // Ensure clean state after each test
+        {{ package_name | to_camel }}.cleanup();
+      });
+
+      test('initializes successfully', () async {
+        await {{ package_name | to_camel }}.init();
+        expect({{ package_name | to_camel }}.isInitialized, isTrue);
+      });
+
+      test('multiple init calls are idempotent', () async {
+        await {{ package_name | to_camel }}.init();
+        await {{ package_name | to_camel }}.init();
+        expect({{ package_name | to_camel }}.isInitialized, isTrue);
+      });
+
+      test('cleanup resets initialization state', () async {
+        await {{ package_name | to_camel }}.init();
+        {{ package_name | to_camel }}.cleanup();
+        expect({{ package_name | to_camel }}.isInitialized, isFalse);
+      });
+
+      test('cleanup is safe to call when not initialized', () {
+        // Should not throw
+        {{ package_name | to_camel }}.cleanup();
+        expect({{ package_name | to_camel }}.isInitialized, isFalse);
+      });
+
+      test('can reinitialize after cleanup', () async {
+        await {{ package_name | to_camel }}.init();
+        {{ package_name | to_camel }}.cleanup();
+        await {{ package_name | to_camel }}.init();
+        expect({{ package_name | to_camel }}.isInitialized, isTrue);
+      });
+    });
+
+    // =========================================================================
+    // Guard tests
+    // =========================================================================
+    group('ensureInitialized', () {
+      test('throws StateError when not initialized', () {
+        {{ package_name | to_camel }}.cleanup();
+        expect(
+          () => {{ package_name | to_camel }}.ensureInitialized(),
+          throwsStateError,
+        );
+      });
+
+      test('does not throw when initialized', () async {
+        await {{ package_name | to_camel }}.init();
+        // Should not throw
+        {{ package_name | to_camel }}.ensureInitialized();
+        {{ package_name | to_camel }}.cleanup();
+      });
+    });
+
+    // =========================================================================
+    // Version tests
+    // =========================================================================
+    group('version', () {
+      test('version string is not empty', () {
+        expect({{ package_name | to_camel }}.version, isNotEmpty);
+      });
+
+      test('version follows semantic versioning format', () {
+        final version = {{ package_name | to_camel }}.version;
+        // Basic semver pattern: major.minor.patch with optional prerelease
+        final semverPattern = RegExp(r'^\d+\.\d+\.\d+(-[\w.]+)?$');
+        expect(
+          semverPattern.hasMatch(version),
+          isTrue,
+          reason: 'Version "$version" should follow semver format',
+        );
+      });
+    });
+  });
+
+  // ===========================================================================
+  // Add more test groups for your library's functionality below
+  // ===========================================================================
+  //
+  // Recommended test structure:
+  // - test/{{ package_name }}_test.dart - Basic initialization and version tests (this file)
+  // - test/utils_test.dart - Utility function tests
+  // - test/<feature>_test.dart - Feature-specific tests
+  //
+  // Example test group structure:
+  //
+  // group('MyFeature', () {
+  //   setUpAll(() async {
+  //     await {{ package_name | to_camel }}.init();
+  //   });
+  //
+  //   tearDownAll(() {
+  //     {{ package_name | to_camel }}.cleanup();
+  //   });
+  //
+  //   test('feature does something', () {
+  //     // Your test here
+  //   });
+  // });
+}

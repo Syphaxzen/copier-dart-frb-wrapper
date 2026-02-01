@@ -1,0 +1,197 @@
+# {{ package_name }}
+
+[![pub package](https://img.shields.io/pub/v/{{ package_name }}.svg)](https://pub.dev/packages/{{ package_name }})
+[![CI](https://github.com/{{ github_repo }}/actions/workflows/test.yml/badge.svg)](https://github.com/{{ github_repo }}/actions/workflows/test.yml)
+[![License](https://img.shields.io/badge/license-{{ license | replace('-', '--') }}-blue.svg)](LICENSE)
+[![Dart](https://img.shields.io/badge/dart-%3E%3D3.10.0-brightgreen.svg)](https://dart.dev)
+[![Flutter](https://img.shields.io/badge/flutter-%3E%3D3.38.0-blue.svg)](https://flutter.dev)
+[![{{ native_library_name }}](https://img.shields.io/badge/{{ native_library_name }}-v1.0.0-orange.svg)](https://github.com/{{ native_repo }})
+
+{{ description }}
+
+## Features
+
+- Cross-platform support: Android, iOS, macOS, Linux, Windows{% if enable_web %}, Web{% endif %}
+
+- Type-safe Dart bindings via Flutter Rust Bridge
+- Automatic native library download via build hooks
+- SHA256 checksum verification for supply chain security
+
+## Installation
+
+Add `{{ package_name }}` to your `pubspec.yaml`:
+
+```yaml
+dependencies:
+  {{ package_name }}: ^x.x.x
+```
+
+Then run:
+
+```bash
+flutter pub get
+```
+
+The native libraries will be downloaded automatically during the build process.
+
+## Usage
+
+```dart
+import 'package:{{ package_name }}/{{ package_name }}.dart';
+
+void main() {
+  // TODO: Add usage example
+}
+```
+
+## Platform Support
+
+| Platform | Architecture | Status |
+|----------|--------------|--------|
+| Android  | arm64-v8a    | ✅ |
+| Android  | armeabi-v7a  | ✅ |
+| Android  | x86_64       | ✅ |
+| iOS      | arm64        | ✅ |
+| iOS Sim  | arm64        | ✅ |
+| iOS Sim  | x86_64       | ✅ |
+| macOS    | arm64        | ✅ |
+| macOS    | x86_64       | ✅ |
+| Linux    | x86_64       | ✅ |
+| Linux    | arm64        | ✅ |
+| Windows  | x86_64       | ✅ |
+{% if enable_web %}| Web      | WASM         | ✅ |
+{% endif %}
+
+## Development
+
+### Prerequisites
+
+- [Flutter](https://flutter.dev/docs/get-started/install) ({{ flutter_sdk_version }})
+- [Rust](https://rustup.rs/) ({{ rust_version }}+)
+- [FVM](https://fvm.app/) (recommended for version management)
+- Make (for build commands)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/{{ github_repo }}.git
+cd {{ package_name }}
+
+# Setup development environment (installs FVM, Flutter, Rust tools)
+make setup
+
+# Generate Dart bindings
+make codegen
+
+# Build native library
+make build
+
+# Run tests
+make test
+
+# See all available commands
+make help
+```
+
+### Developing Rust API
+
+1. Add your Rust functions in `rust/src/api/`:
+
+```rust
+// rust/src/api/greeting.rs
+pub fn greet(name: String) -> String {
+    format!("Hello, {}!", name)
+}
+```
+
+2. Register the module in `rust/src/api/mod.rs`:
+
+```rust
+pub mod greeting;
+```
+
+3. Generate Dart bindings:
+
+```bash
+make codegen
+```
+
+4. Build and test:
+
+```bash
+make build
+make test
+```
+
+### Building Native Libraries
+
+Native libraries are pre-built and downloaded automatically via build hooks.
+If you need to build them locally:
+
+```bash
+# Build for current platform
+make build
+
+# Build with specific target
+make build ARGS="--target aarch64-apple-darwin"
+
+# Build for Android
+make build-android
+{% if enable_web %}
+# Build for Web (WASM)
+make build-web
+{% endif %}
+```
+
+## CI / Version Management
+
+```bash
+# Check for new {{ native_library_name }} versions
+make check-new-{{ package_name }}-version
+
+# Update Cargo.lock dependencies
+make update
+
+# Generate AI-powered changelog entry (requires AI_MODELS_TOKEN)
+make update-changelog ARGS="--version v1.0.0"
+```
+
+The CI automatically checks for new {{ native_library_name }} releases daily and creates PRs with:
+- Updated `pubspec.yaml` and version badges
+- Updated `Cargo.lock` (if successful)
+- Regenerated FRB bindings (if successful)
+- AI-generated CHANGELOG entry (if `AI_MODELS_TOKEN` secret is configured)
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────┐
+│     {{ native_library_name }} (Native/Rust)    │  ← Core implementation
+├─────────────────────────────────────────────────┤
+│       rust/src/api/*.rs (Rust wrappers)         │  ← FRB-annotated functions
+├─────────────────────────────────────────────────┤
+│      lib/src/rust/*.dart (FRB generated)        │  ← Auto-generated Dart API
+├─────────────────────────────────────────────────┤
+│           Your Dart application code            │  ← Uses the API
+└─────────────────────────────────────────────────┘
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+## Security
+
+See [SECURITY.md](SECURITY.md) for security policy and reporting vulnerabilities.
+
+**Note:** Update SECURITY.md with your contact information for vulnerability reports.
+
+## License
+
+This project is licensed under the {{ license }} License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [{{ native_library_name }}](https://github.com/{{ native_repo }}) - Native library
+- [Flutter Rust Bridge](https://cjycode.com/flutter_rust_bridge/) - Dart/Flutter <-> Rust binding generator

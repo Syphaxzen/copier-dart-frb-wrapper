@@ -1,0 +1,23 @@
+#!/bin/bash
+# Pre-commit hook for {{ package_name }}
+# Install: git config core.hooksPath .githooks
+
+set -e
+
+echo "Running pre-commit checks..."
+
+# Format check
+echo "Checking code formatting..."
+if ! fvm dart format --set-exit-if-changed lib test scripts hook 2>/dev/null; then
+    echo "Code is not formatted. Run 'make format' to fix."
+    exit 1
+fi
+
+# Analyze
+echo "Analyzing code..."
+if ! fvm dart analyze --fatal-infos 2>/dev/null; then
+    echo "Analysis failed. Fix issues before committing."
+    exit 1
+fi
+
+echo "Pre-commit checks passed!"

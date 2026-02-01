@@ -1,0 +1,39 @@
+name: {{ package_name }}
+description: {{ description }}
+
+version: 1.0.0
+license: {{ license }}
+repository: https://github.com/{{ github_repo }}
+homepage: https://github.com/{{ github_repo }}
+issue_tracker: https://github.com/{{ github_repo }}/issues
+
+environment:
+  sdk: {{ dart_sdk_version }}
+  flutter: "{{ flutter_sdk_version }}"
+
+dependencies:
+  flutter_rust_bridge: {{ frb_version }}
+  # SHA256 verification for native library downloads
+  crypto: ^3.0.7
+  # Build hooks for automatic native library download
+  hooks: ^1.0.0
+  code_assets: ^1.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.24.0
+  coverage: ^1.15.0
+  ffigen: ^20.0.0  # Required by flutter_rust_bridge_codegen
+
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  windows:
+{% if enable_web %}  web:
+{% endif %}
+topics:
+{%- for topic in topics.split(',') | map('trim') %}
+  - {{ topic }}
+{%- endfor %}

@@ -1,0 +1,58 @@
+{% if enable_protoc %}name: Setup Protoc
+description: Install Protocol Buffers compiler (protoc) for the current platform
+
+runs:
+  using: composite
+  steps:
+    - name: Install Protobuf (Linux)
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y protobuf-compiler
+        protoc --version
+      shell: bash
+
+    - name: Install Protobuf (macOS)
+      if: runner.os == 'macOS'
+      run: |
+        brew install protobuf
+        protoc --version
+      shell: bash
+
+    - name: Install Protobuf (Windows)
+      if: runner.os == 'Windows'
+      run: |
+        # Download protoc directly from GitHub releases (more reliable than Chocolatey)
+        $protocVersion = "29.3"
+        $protocZip = "protoc-$protocVersion-win64.zip"
+        $protocUrl = "https://github.com/protocolbuffers/protobuf/releases/download/v$protocVersion/$protocZip"
+        $protocDir = "$env:RUNNER_TEMP\protoc"
+
+        Write-Output "Downloading protoc $protocVersion from GitHub..."
+        Invoke-WebRequest -Uri $protocUrl -OutFile "$env:RUNNER_TEMP\$protocZip"
+
+        Write-Output "Extracting to $protocDir..."
+        Expand-Archive -Path "$env:RUNNER_TEMP\$protocZip" -DestinationPath $protocDir -Force
+
+        # Add to PATH and set PROTOC env var for prost-build
+        $protocBin = "$protocDir\bin"
+        $protocPath = "$protocBin\protoc.exe"
+
+        Write-Output "$protocBin" >> $env:GITHUB_PATH
+        Write-Output "PROTOC=$protocPath" >> $env:GITHUB_ENV
+
+        Write-Output "Protoc path: $protocPath"
+        & $protocPath --version
+      shell: pwsh
+{% else %}# Protocol Buffers support is disabled (enable_protoc=false)
+# This action is a no-op placeholder
+name: Setup Protoc (disabled)
+description: Protocol Buffers support is disabled for this project
+
+runs:
+  using: composite
+  steps:
+    - name: Protoc not required
+      run: echo "Protocol Buffers support is disabled for this project"
+      shell: bash
+{% endif %}

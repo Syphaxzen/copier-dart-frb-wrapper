@@ -1,0 +1,12 @@
+//! {{ crate_name }} - Rust bridge layer for {{ package_name }}.
+//!
+//! {{ description }}
+
+#![allow(dead_code)]
+
+mod frb_generated;
+mod utils;
+
+pub mod api;
+
+pub use utils::current_time;

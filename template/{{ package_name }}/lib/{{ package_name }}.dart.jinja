@@ -1,0 +1,45 @@
+/// {{ description }}
+///
+/// This is the main entry point for {{ package_name }}.
+///
+/// ## Getting Started
+///
+/// Add this package to your `pubspec.yaml`:
+///
+/// ```yaml
+/// dependencies:
+///   {{ package_name }}: ^1.0.0
+/// ```
+///
+/// Native libraries are downloaded automatically during build via Dart Build Hooks.
+///
+/// ## Usage
+///
+/// ```dart
+/// import 'package:{{ package_name }}/{{ package_name }}.dart';
+///
+/// void main() async {
+///   await {{ package_name | to_camel }}.init();
+///   // ... use {{ package_name }} APIs
+/// }
+/// ```
+///
+/// ## Platform Support
+///
+/// - Linux (x86_64, arm64)
+/// - macOS (arm64, x86_64)
+/// - Windows (x86_64)
+/// - Android (arm64-v8a, armeabi-v7a, x86_64)
+/// - iOS (device arm64, simulator arm64/x86_64)
+{% if enable_web %}/// - Web (WASM)
+{% endif %}
+library;
+
+// Core initialization
+export 'src/{{ package_name }}.dart';
+
+// FRB-generated API (uncomment after running `make codegen`)
+// export 'src/rust/api/greeting.dart';
+
+// Export your custom Dart wrappers
+// export 'src/api.dart';

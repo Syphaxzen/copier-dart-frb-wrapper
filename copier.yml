@@ -1,0 +1,313 @@
+# =============================================================================
+# Copier Template: Dart/Flutter FRB (Flutter Rust Bridge) Wrapper
+# =============================================================================
+# Copier template for creating Dart/Flutter packages that wrap native Rust
+# libraries using Flutter Rust Bridge with full CI/CD support.
+#
+# Usage:
+#   copier copy https://github.com/djx-y-z/copier-dart-frb-wrapper my_package
+#
+# Requirements:
+#   pip install copier jinja2-strcase
+# =============================================================================
+
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_templates_suffix: .jinja
+
+# Jinja2 extensions for case conversion
+_jinja_extensions:
+  - jinja2_strcase.StrcaseExtension
+
+# =============================================================================
+# Exclude files conditionally
+# =============================================================================
+_exclude:
+  - copier.yml
+  - copier.yaml
+  - "*.py[co]"
+  - __pycache__
+  - .git
+  - .DS_Store
+  - .svn
+  - "~*"
+
+# =============================================================================
+# VARIABLES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Required - Package info
+# -----------------------------------------------------------------------------
+package_name:
+  type: str
+  help: "Package name (lowercase, no spaces, e.g., my_signal_lib)"
+  validator: >-
+    {% if not package_name %}
+    package_name is required
+    {% elif not (package_name | regex_search('^[a-z][a-z0-9_]*$')) %}
+    Must be lowercase, start with a letter, contain only letters, numbers, underscores. Got: "{{ package_name }}"
+    {% endif %}
+
+description:
+  type: str
+  help: "Package description for pubspec.yaml"
+  validator: "{% if not description %}description is required{% endif %}"
+
+native_library_name:
+  type: str
+  help: "Name of the native library (e.g., signal_protocol, libsodium)"
+  validator: "{% if not native_library_name %}native_library_name is required{% endif %}"
+
+github_repo:
+  type: str
+  help: "GitHub repository of your wrapper package (username/repo_name)"
+  validator: >-
+    {% if not github_repo %}
+    github_repo is required
+    {% elif not (github_repo | regex_search('^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$')) %}
+    Must be in format "username/repo_name". Got: "{{ github_repo }}"
+    {% endif %}
+
+native_repo:
+  type: str
+  help: "GitHub repository of the native library (username/repo_name, e.g., nickvision/libnick)"
+  validator: >-
+    {% if not native_repo %}
+    native_repo is required
+    {% elif not (native_repo | regex_search('^[a-zA-Z0-9_-]+/[a-zA-Z0-9_.-]+$')) %}
+    Must be in format "username/repo_name". Got: "{{ native_repo }}"
+    {% endif %}
+
+# -----------------------------------------------------------------------------
+# Rust crate configuration
+# -----------------------------------------------------------------------------
+crate_name:
+  type: str
+  help: "Rust crate name for the FRB wrapper"
+  default: "{{ package_name }}_frb"
+
+rust_edition:
+  type: str
+  help: "Rust edition"
+  choices:
+    - "2021"
+    - "2024"
+  default: "2024"
+
+rust_version:
+  type: str
+  help: "Minimum Rust version (MSRV)"
+  default: "1.88"
+
+# -----------------------------------------------------------------------------
+# Flutter Rust Bridge configuration
+# -----------------------------------------------------------------------------
+frb_version:
+  type: str
+  help: "Flutter Rust Bridge version constraint"
+  default: "^2.11.1"
+
+# -----------------------------------------------------------------------------
+# Upstream Rust crate (optional)
+# -----------------------------------------------------------------------------
+upstream_crate:
+  type: str
+  help: "Upstream Rust crate to wrap (optional, leave empty if not using)"
+  default: ""
+
+upstream_version:
+  type: str
+  help: "Version/tag of the upstream crate (e.g., v1.0.0)"
+  default: ""
+  when: "{{ upstream_crate != '' }}"
+
+# -----------------------------------------------------------------------------
+# Version prefix handling
+# -----------------------------------------------------------------------------
+strip_version_prefix:
+  type: bool
+  help: "Strip 'v' prefix from upstream version tags (v1.0.0 -> 1.0.0)"
+  default: false
+
+# -----------------------------------------------------------------------------
+# Web/WASM support
+# -----------------------------------------------------------------------------
+enable_web:
+  type: bool
+  help: "Enable Web/WASM support"
+  default: true
+
+# -----------------------------------------------------------------------------
+# Protocol Buffers support (optional)
+# -----------------------------------------------------------------------------
+enable_protoc:
+  type: bool
+  help: "Enable Protocol Buffers support (install protoc in setup/CI)"
+  default: false
+
+# -----------------------------------------------------------------------------
+# Claude Code support
+# -----------------------------------------------------------------------------
+enable_claude:
+  type: bool
+  help: "Include Claude Code configuration (CLAUDE.md, .claude/skills/)"
+  default: true
+
+# -----------------------------------------------------------------------------
+# Flutter/Dart versions
+# -----------------------------------------------------------------------------
+flutter_version:
+  type: str
+  help: "Flutter version for FVM"
+  default: "3.38.4"
+
+dart_sdk_version:
+  type: str
+  help: "Dart SDK version constraint"
+  default: "^3.10.0"
+
+flutter_sdk_version:
+  type: str
+  help: "Flutter SDK version constraint"
+  default: ">=3.38.0"
+
+# -----------------------------------------------------------------------------
+# Android config
+# -----------------------------------------------------------------------------
+android_min_sdk:
+  type: str
+  help: "Android minimum SDK version"
+  default: "21"
+
+android_compile_sdk:
+  type: str
+  help: "Android compile SDK version"
+  default: "34"
+
+android_ndk_version:
+  type: str
+  help: "Android NDK version for Rust cross-compilation"
+  default: "26.3.11579264"
+
+# -----------------------------------------------------------------------------
+# License
+# -----------------------------------------------------------------------------
+license:
+  type: str
+  help: "Package license"
+  choices:
+    - MIT
+    - AGPL-3.0
+    - Apache-2.0
+    - BSD-3-Clause
+  default: MIT
+
+# -----------------------------------------------------------------------------
+# Topics
+# -----------------------------------------------------------------------------
+topics:
+  type: str
+  help: "Package topics for pub.dev (comma-separated, max 5, e.g., cryptography,ffi,native)"
+  default: "ffi,native,rust"
+  validator: "{% if topics.split(',') | map('trim') | select | list | length > 5 %}Maximum 5 topics allowed (pub.dev limit){% endif %}"
+
+# =============================================================================
+# POST-GENERATION TASKS
+# =============================================================================
+_tasks:
+  # Create Flutter example app
+  - command: >-
+      flutter create example
+      --platforms=android,ios,linux,macos,windows{% if enable_web %},web{% endif %}
+      --project-name {{ package_name }}_example
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+
+  # Copy template files to example
+  - command: >-
+      cp _templates/example_pubspec.yaml example/pubspec.yaml &&
+      cp _templates/example_main.dart example/lib/main.dart
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+
+  # Create CLI example app
+  - command: dart create -t console example_cli --force
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+
+  # Copy template files to example_cli and cleanup
+  - command: >-
+      cp _templates/example_cli_pubspec.yaml example_cli/pubspec.yaml &&
+      cp _templates/example_cli_main.dart example_cli/bin/{{ package_name }}_cli.dart &&
+      rm -f example_cli/bin/example_cli.dart
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+
+  # Remove _templates directory
+  - command: rm -rf _templates
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+
+  # Remove Claude files when enable_claude is false
+  - command: rm -rf CLAUDE.md .claude
+    working_directory: "{{ _copier_conf.dst_path }}/{{ package_name }}"
+    when: "{{ not enable_claude }}"
+
+# =============================================================================
+# Messages
+# =============================================================================
+_message_after_copy: |
+
+  FRB wrapper generated successfully!
+
+  Package: {{ package_name }}
+  Crate: {{ crate_name }}
+  {% if upstream_crate %}Upstream: {{ upstream_crate }} @ {{ upstream_version }}{% endif %}
+
+  Next steps:
+
+  1. Navigate to your package directory:
+     cd {{ _copier_conf.dst_path }}/{{ package_name }}
+
+  2. Add native library license:
+     Copy the license file from the native library to:
+     LICENSE_NATIVE or include in LICENSE
+
+  3. Install dependencies and setup:
+     make setup
+
+  4. Implement your Rust API in rust/src/api/
+     Add your FRB-annotated functions here
+
+  5. Generate Dart bindings:
+     make codegen
+
+  6. Build native libraries:
+     make build
+
+  7. Implement your Dart API in lib/src/
+
+  8. Update example apps in example/ and example_cli/
+
+  9. Write tests in test/ directory
+     See test/{{ package_name }}_test.dart for template
+
+  10. Run tests:
+      make test
+
+  11. Customize package metadata:
+      - Update topics in pubspec.yaml if needed
+      - Add topics in GitHub repository settings
+      - Review and update SECURITY.md with your contact information
+
+  12. Configure GitHub Actions:
+      - Create GitHub App for signed commits (APP_ID, APP_PRIVATE_KEY)
+      - Setup coverage badge (GIST_TOKEN, COVERAGE_GIST_ID)
+      See README.md for detailed instructions
+
+  For more information, see {% if enable_claude %}CLAUDE.md and {% endif %}README.md
+
+_message_after_update: |
+
+  FRB wrapper updated successfully!
+
+  Review the changes and run:
+    make setup
+    make codegen
+    make build
