@@ -19,6 +19,11 @@ log = "0.4"
 {% if upstream_crate %}
 
 {{ upstream_crate }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }
+{% elif upstream_crates != '' %}
+
+{% for crate in upstream_crates.split(',') %}
+{{ crate | trim }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }
+{% endfor %}
 {% endif %}
 {% if enable_web %}
 

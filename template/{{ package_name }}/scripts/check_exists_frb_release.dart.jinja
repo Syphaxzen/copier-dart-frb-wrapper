@@ -12,7 +12,7 @@
 ///
 /// CI Outputs:
 ///   - version: The crate version from rust/Cargo.toml
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
 ///   - {{ package_name }}_version: The upstream {{ native_library_name }} version
 {% endif %}
 ///   - skip: 'true' if release exists, 'false' otherwise
@@ -26,14 +26,14 @@ void main(List<String> args) async {
   final isCi = args.contains('--ci');
 
   final version = getCrateVersion();
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
   final upstreamVersion = getUpstreamVersion();
 {% endif %}
   final releaseTag = '{{ crate_name }}-$version';
 
   logInfo('Checking release status...');
   logInfo('Crate version: $version');
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
   logInfo('{{ native_library_name }} version: $upstreamVersion');
 {% endif %}
   logInfo('Release tag: $releaseTag');
@@ -48,7 +48,7 @@ void main(List<String> args) async {
       final file = File(outputFile);
       final buffer = StringBuffer();
       buffer.writeln('version=$version');
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
       buffer.writeln('{{ package_name }}_version=$upstreamVersion');
 {% endif %}
       buffer.writeln('skip=${releaseExists ? 'true' : 'false'}');

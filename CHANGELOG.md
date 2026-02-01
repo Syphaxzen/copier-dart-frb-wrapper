@@ -1,3 +1,19 @@
+## [1.1.0] - 2026-02-01
+
+### Added
+
+- **Multiple upstream crates support**: New `upstream_crates` variable for projects that depend on multiple crates from the same git repository (e.g., `libsignal-protocol,libsignal-core,signal-crypto`)
+- Updated `rust/Cargo.toml.jinja` to generate dependencies for all specified crates
+- Updated `scripts/src/common.dart.jinja` with `getUpstreamVersion()` function supporting multiple crates
+- Updated `scripts/src/check_updates.dart.jinja` to update all upstream crate versions simultaneously
+- Updated `scripts/check_exists_frb_release.dart.jinja` for multiple crates support
+- Updated `.github/workflows/build-*.yml.jinja` for multiple crates support
+
+### Changed
+
+- `upstream_crates` and `upstream_crate` are now mutually exclusive - use one or the other
+- Improved documentation for upstream crate configuration in `copier.yml`
+
 ## [1.0.0] - 2026-02-01
 
 ### Added
@@ -50,5 +66,6 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/releases/tag/v1.0.0

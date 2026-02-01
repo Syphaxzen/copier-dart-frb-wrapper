@@ -75,7 +75,7 @@ Future<UpdateCheckResult> checkForUpdates({
   bool silent = false,
 }) async {
   // Read current version from rust/Cargo.toml
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
   final currentVersion = getUpstreamVersion();
 {% else %}
   final currentVersion = getCrateVersion();
@@ -179,7 +179,7 @@ Future<Map<String, dynamic>> _fetchLatestRelease() async {
 /// Update upstream version in all relevant files.
 ///
 /// Updates:
-{% if upstream_crate %}
+{% if upstream_crate or upstream_crates %}
 /// - rust/Cargo.toml (upstream dependency tag)
 {% endif %}
 /// - README.md (badge) - if exists
@@ -214,6 +214,29 @@ Future<List<String>> updateVersionFiles({
     tagPattern,
     (match) => '${match.group(1)}$newVersion${match.group(2)}',
   );
+
+  await cargoFile.writeAsString(cargoContent);
+  updatedFiles.add('rust/Cargo.toml');
+  if (!silent) logInfo('Updated rust/Cargo.toml: tag = "$newVersion"');
+{% elif upstream_crates %}
+  // 1. Update rust/Cargo.toml (all upstream dependency tags)
+  if (!silent) logStep('Updating rust/Cargo.toml...');
+  final cargoFile = File('${packageDir.path}/rust/Cargo.toml');
+  if (!cargoFile.existsSync()) {
+    throw Exception('rust/Cargo.toml not found');
+  }
+  var cargoContent = cargoFile.readAsStringSync();
+
+  // Update all upstream dependency tags
+{% for crate in upstream_crates.split(',') | map('trim') | select %}
+  final tagPattern{{ loop.index }} = RegExp(
+    r'({{ crate }}\s*=\s*\{[^}]*tag\s*=\s*")[^"]+(")',
+  );
+  cargoContent = cargoContent.replaceAllMapped(
+    tagPattern{{ loop.index }},
+    (match) => '${match.group(1)}$newVersion${match.group(2)}',
+  );
+{% endfor %}
 
   await cargoFile.writeAsString(cargoContent);
   updatedFiles.add('rust/Cargo.toml');

@@ -116,11 +116,18 @@ upstream_crate:
   help: "Upstream Rust crate to wrap (optional, leave empty if not using)"
   default: ""
 
+# Multiple upstream Rust crates (for git-based dependencies from same repo)
+# Note: Use EITHER upstream_crate (single) OR upstream_crates (multiple), not both
+upstream_crates:
+  type: str
+  help: "Comma-separated list of upstream Rust crates from same git repo (e.g., 'libsignal-protocol,libsignal-core,signal-crypto'). Use this instead of upstream_crate when you have multiple crates."
+  default: ""
+
 upstream_version:
   type: str
   help: "Version/tag of the upstream crate (e.g., v1.0.0)"
   default: ""
-  when: "{{ upstream_crate != '' }}"
+  when: "{{ upstream_crate != '' or upstream_crates != '' }}"
 
 # -----------------------------------------------------------------------------
 # Version prefix handling
@@ -259,6 +266,7 @@ _message_after_copy: |
   Package: {{ package_name }}
   Crate: {{ crate_name }}
   {% if upstream_crate %}Upstream: {{ upstream_crate }} @ {{ upstream_version }}{% endif %}
+  {% if upstream_crates %}Upstream crates: {{ upstream_crates }} @ {{ upstream_version }}{% endif %}
 
   Next steps:
 
