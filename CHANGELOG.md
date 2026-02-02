@@ -1,3 +1,50 @@
+## [1.3.0] - 2026-02-02
+
+### Added
+
+- **New template variables for Android:**
+  - `android_gradle_version` (default: `8.11.1`) — Android Gradle plugin version
+  - `android_java_version` (default: `17`, choices: `11`, `17`, `21`) — Java version for Android compilation
+- **Example app improvements:**
+  - Added `.gitignore` files for both Flutter and CLI examples
+  - Added `analysis_options.yaml` for CLI example (disables `avoid_print` lint)
+  - Added iOS/macOS xcconfig files for proper CocoaPods configuration
+  - Added `--org` parameter when creating Flutter example app
+- **Pre-commit hook now runs `make rust-check`** — validates Rust code before commits
+- **Test workflow triggers on `rust/**` changes** — ensures tests run when Rust code is modified
+- **Coverage badge now uses color range** — badge color reflects coverage percentage (50-90% range)
+
+### Changed
+
+- **Android defaults updated:**
+  - `android_min_sdk`: `21` → `24` (Android 7.0+)
+  - `android_compile_sdk`: `34` → `36`
+- **Rust Cargo.lock is now committed** — removed from `.gitignore` for reproducible builds
+- **Simplified Makefile:**
+  - Removed `make combine` target (unused)
+  - Removed `make regen` alias (use `make codegen` directly)
+  - Removed `.skip_{{ package_name }}_hook` workarounds from build commands
+  - Added informative build completion messages
+- **Improved pre-commit hook** — added colored output and Rust checking
+- **Improved check-updates workflow:**
+  - Simplified status tracking with boolean `success` outputs
+  - Cleaner PR description format
+- **Improved test-reusable workflow:**
+  - Simplified Rust setup (removed explicit target specification)
+  - Removed badge secrets validation step
+- **Cleaned up Jinja2 whitespace** — using `{%-` syntax for cleaner output in multiple templates
+- **Updated .pubignore** — added `docs/`, `rust/target/`, generated plugin files
+
+### Fixed
+
+- **LICENSE.jinja** — added complete AGPL-3.0 license text (was truncated)
+- **analysis_options.yaml** — removed incorrect exclude for `lib/src/bindings/**`
+
+### Removed
+
+- **security-review Claude skill** — removed from generated projects
+- **combine_artifacts.dart script** — no longer needed
+
 ## [1.2.0] - 2026-02-01
 
 ### Changed
@@ -81,7 +128,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/releases/tag/v1.0.0

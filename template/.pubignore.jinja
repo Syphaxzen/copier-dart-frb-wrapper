@@ -26,6 +26,7 @@ coverage/
 
 # Documentation
 doc/
+docs/
 
 # Build artifacts
 build/
@@ -47,11 +48,21 @@ example/macos/Runner.xcworkspace/
 # CLI example (not part of the Flutter plugin example)
 example_cli/
 
+# Downloaded WASM files (auto-downloaded by hook/build.dart)
+example/web/pkg/
+
 # FVM
 .fvm/
+
+# Rust build artifacts
+rust/target/
 
 # Hook build cache
 hook/.dart_tool/
 
-# FRB config (not needed at runtime)
-flutter_rust_bridge.yaml
+# Generated plugin files (not needed for plugin distribution)
+android/app/
+ios/Flutter/ephemeral/
+ios/Runner/
+macos/Flutter/ephemeral/
+linux/flutter/generated_*

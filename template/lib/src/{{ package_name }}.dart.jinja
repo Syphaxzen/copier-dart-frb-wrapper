@@ -39,13 +39,13 @@ const _nativeAssetId = 'package:{{ package_name }}/{{ package_name }}';
 /// 4. **CWD**: `rust/target/release/` relative to current directory
 /// 5. **FRB default**: For Flutter apps with Cargokit
 ///
-{% if enable_web %}
+{%- if enable_web %}
 /// ### For Web
 ///
 /// The WASM module is loaded from the `pkg/` directory automatically.
 /// Custom library paths are not supported on web.
 ///
-{% endif %}
+{%- endif %}
 /// ### For Flutter apps
 ///
 /// Cargokit automatically builds the native library{% if enable_web %} or WASM module{% endif %}.
@@ -101,14 +101,14 @@ class {{ package_name | to_camel }} {
   /// Load the native library from the best available location.
   static Future<ExternalLibrary> _loadLibrary(String? customPath) async {
     // coverage:ignore-start
-{% if enable_web %}
+{%- if enable_web %}
     // On web, always use the default WASM loading
     if (platform.kIsWeb) {
       return await loadExternalLibrary(
         RustLib.kDefaultExternalLibraryLoaderConfig,
       );
     }
-{% endif %}
+{%- endif %}
     // coverage:ignore-end
 
     // 1. Try custom path first (native only)

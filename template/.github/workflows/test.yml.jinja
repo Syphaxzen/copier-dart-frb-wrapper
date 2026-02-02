@@ -17,6 +17,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'rust/**'
       - 'pubspec.yaml'
       - '.github/workflows/test.yml'
       - '.github/workflows/test-reusable.yml'
@@ -24,6 +25,7 @@ on:
     paths:
       - 'lib/**'
       - 'test/**'
+      - 'rust/**'
       - 'pubspec.yaml'
   workflow_run:
     workflows: ["Build {{ package_name }} Native Libraries"]

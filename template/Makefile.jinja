@@ -8,7 +8,7 @@
 # On Windows CI (Git Bash), use cmd to run fvm.bat from PATH:
 # Example: make build ARGS="--target x86_64-pc-windows-msvc" FVM="cmd //c fvm"
 
-.PHONY: help setup setup-fvm setup-rust-tools setup-android{% if enable_protoc %} setup-protoc{% endif %}{% if enable_web %} setup-web{% endif %} codegen regen build build-android{% if enable_web %} build-web{% endif %} test coverage analyze format format-check get clean version check-new-{{ package_name }}-version check-exists-{{ package_name }}-frb-release rust-audit rust-check doc publish publish-dry-run combine update update-changelog
+.PHONY: help setup setup-fvm setup-rust-tools setup-android{% if enable_protoc %} setup-protoc{% endif %}{% if enable_web %} setup-web{% endif %} codegen regen build build-android{% if enable_web %} build-web{% endif %} test coverage analyze format format-check get clean version check-new-{{ package_name }}-version check-exists-{{ package_name }}-frb-release rust-audit rust-check doc publish publish-dry-run update update-changelog
 
 # FVM command - can be overridden to provide full path on Windows CI
 FVM ?= fvm
@@ -33,30 +33,28 @@ help:
 	@echo "    make setup                        - Full setup (FVM + Rust tools{% if enable_protoc %} + protoc{% endif %})"
 	@echo "    make setup-fvm                    - Install FVM and project Flutter version only"
 	@echo "    make setup-rust-tools             - Install Rust tools (cargo-audit, frb codegen)"
-	@echo "    make setup-android                - Install Android build tools (cargo-ndk)"
-{% if enable_protoc %}
+{%- if enable_protoc %}
 	@echo "    make setup-protoc                 - Install protoc (Protocol Buffers compiler)"
-{% endif %}
-{% if enable_web %}
+{%- endif %}
+	@echo "    make setup-android                - Install Android build tools (cargo-ndk)"
+{%- if enable_web %}
 	@echo "    make setup-web                    - Install web build tools (wasm-pack)"
-{% endif %}
+{%- endif %}
 	@echo ""
 	@echo "  BUILD & CODEGEN"
 	@echo "    make codegen                      - Generate Dart bindings from Rust code"
-	@echo "    make regen                        - Alias for codegen"
 	@echo "    make build                        - Build Rust library for current platform"
 	@echo "                                        Example: make build ARGS=\"--target aarch64-apple-darwin\""
 	@echo "    make build-android                - Build for Android (all ABIs)"
 	@echo "                                        Example: make build-android ARGS=\"--target arm64-v8a\""
-{% if enable_web %}
+{%- if enable_web %}
 	@echo "    make build-web                    - Build WASM for web platform"
-{% endif %}
+{%- endif %}
 	@echo ""
 	@echo "  CI / VERSION CHECKS"
 	@echo "    make check-new-{{ package_name }}-version  - Check for new upstream {{ native_library_name }} version"
 	@echo "                                        Example: make check-new-{{ package_name }}-version ARGS=\"--update\""
 	@echo "    make check-exists-{{ package_name }}-frb-release - Check if FRB release exists on GitHub"
-	@echo "    make combine                      - Combine CI artifacts (used by GitHub Actions)"
 	@echo "    make update                       - Update Cargo.lock (cargo update)"
 	@echo "    make update-changelog             - Update CHANGELOG.md with AI"
 	@echo "                                        Example: make update-changelog ARGS=\"--version v1.0.0\""
@@ -96,9 +94,9 @@ setup:
 		exit 1; \
 	fi
 	@$(MAKE) setup-fvm
-{% if enable_protoc %}
+{%- if enable_protoc %}
 	@$(MAKE) setup-protoc
-{% endif %}
+{%- endif %}
 	@$(MAKE) setup-rust-tools
 	@echo ""
 	@echo "Full setup complete! You can now use 'make help' to see available commands."
@@ -148,7 +146,7 @@ setup-android:
 	@echo "Android setup complete!"
 	@echo "Make sure you have Android NDK installed via Android Studio or sdkmanager."
 
-{% if enable_protoc %}
+{%- if enable_protoc %}
 # Detect OS for platform-specific commands
 UNAME_S := $(shell uname -s)
 
@@ -187,9 +185,8 @@ setup-protoc:
 		fi; \
 	fi
 	@echo "protoc setup complete!"
-
-{% endif %}
-{% if enable_web %}
+{%- endif %}
+{%- if enable_web %}
 setup-web:
 	@echo "Installing web build tools..."
 	@if ! command -v wasm-pack >/dev/null 2>&1; then \
@@ -201,8 +198,7 @@ setup-web:
 	rustup target add wasm32-unknown-unknown
 	@echo ""
 	@echo "Web setup complete!"
-
-{% endif %}
+{%- endif %}
 # =============================================================================
 # Code Generation
 # =============================================================================
@@ -219,25 +215,26 @@ regen: codegen
 # =============================================================================
 
 build:
+	@echo "Building Rust library..."
 	cargo build --release --manifest-path rust/Cargo.toml $(ARGS)
+	@echo ""
+	@echo "Build complete! Library at: rust/target/"
 
 build-android:
-	@echo "Building for Android..."
-	@touch .skip_{{ package_name }}_hook
-	@cd rust && cargo ndk --platform {{ android_min_sdk }} build --release $(ARGS); ret=$$?; rm -f ../.skip_{{ package_name }}_hook; exit $$ret
+	@echo "Building Rust library for Android..."
+	cd rust && cargo ndk --platform {{ android_min_sdk }} build --release $(ARGS)
+	@echo ""
+	@echo "Build complete! Library at: rust/target/<arch>/release/"
 
-{% if enable_web %}
+{%- if enable_web %}
 build-web:
 	@echo "Building WASM for web..."
-	@touch .skip_{{ package_name }}_hook
-	@cd rust && wasm-pack build --target no-modules --release \
-		--out-dir target/wasm32 --out-name {{ crate_name }} --no-typescript; \
-		ret=$$?; \
-		rm -f target/wasm32/.gitignore target/wasm32/package.json; \
-		rm -f ../.skip_{{ package_name }}_hook; \
-		exit $$ret
-
-{% endif %}
+	cd rust && wasm-pack build --target no-modules --release \
+		--out-dir target/wasm32 --out-name {{ crate_name }} --no-typescript
+	@rm -f rust/target/wasm32/.gitignore rust/target/wasm32/package.json
+	@echo ""
+	@echo "Build complete! WASM files at: rust/target/wasm32/"
+{%- endif %}
 # =============================================================================
 # Rust Quality
 # =============================================================================
@@ -259,10 +256,6 @@ check-new-{{ package_name }}-version:
 check-exists-{{ package_name }}-frb-release:
 	@touch .skip_{{ package_name }}_hook
 	@$(FVM) dart run scripts/check_exists_frb_release.dart $(ARGS); ret=$$?; rm -f .skip_{{ package_name }}_hook; exit $$ret
-
-combine:
-	@touch .skip_{{ package_name }}_hook
-	@$(FVM) dart run scripts/combine_artifacts.dart $(ARGS); ret=$$?; rm -f .skip_{{ package_name }}_hook; exit $$ret
 
 update:
 	@echo "Updating Cargo.lock..."

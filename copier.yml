@@ -186,17 +186,31 @@ flutter_sdk_version:
 android_min_sdk:
   type: str
   help: "Android minimum SDK version"
-  default: "21"
+  default: "24"
 
 android_compile_sdk:
   type: str
   help: "Android compile SDK version"
-  default: "34"
+  default: "36"
 
 android_ndk_version:
   type: str
   help: "Android NDK version for Rust cross-compilation"
   default: "26.3.11579264"
+
+android_gradle_version:
+  type: str
+  help: "Android Gradle plugin version"
+  default: "8.11.1"
+
+android_java_version:
+  type: str
+  help: "Java version for Android compilation"
+  choices:
+    - "11"
+    - "17"
+    - "21"
+  default: "17"
 
 # -----------------------------------------------------------------------------
 # License
@@ -229,12 +243,18 @@ _tasks:
       flutter create example
       --platforms=android,ios,linux,macos,windows{% if enable_web %},web{% endif %}
       --project-name {{ package_name }}_example
+      --org com.{{ package_name }}
     working_directory: "{{ _copier_conf.dst_path }}"
 
   # Copy template files to example
   - command: >-
       cp _templates/example_pubspec.yaml example/pubspec.yaml &&
-      cp _templates/example_main.dart example/lib/main.dart
+      cp _templates/example_main.dart example/lib/main.dart &&
+      cp _templates/example_gitignore example/.gitignore &&
+      cp _templates/example_ios_debug.xcconfig example/ios/Flutter/Debug.xcconfig &&
+      cp _templates/example_ios_release.xcconfig example/ios/Flutter/Release.xcconfig &&
+      cp _templates/example_macos_debug.xcconfig example/macos/Flutter/Flutter-Debug.xcconfig &&
+      cp _templates/example_macos_release.xcconfig example/macos/Flutter/Flutter-Release.xcconfig
     working_directory: "{{ _copier_conf.dst_path }}"
 
   # Create CLI example app
@@ -245,6 +265,8 @@ _tasks:
   - command: >-
       cp _templates/example_cli_pubspec.yaml example_cli/pubspec.yaml &&
       cp _templates/example_cli_main.dart example_cli/bin/{{ package_name }}_cli.dart &&
+      cp _templates/example_cli_gitignore example_cli/.gitignore &&
+      cp _templates/example_cli_analysis_options.yaml example_cli/analysis_options.yaml &&
       rm -f example_cli/bin/example_cli.dart
     working_directory: "{{ _copier_conf.dst_path }}"
 

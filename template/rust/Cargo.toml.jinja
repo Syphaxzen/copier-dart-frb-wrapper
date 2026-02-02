@@ -16,16 +16,14 @@ crate-type = ["cdylib", "staticlib"]
 flutter_rust_bridge = "={{ frb_version | replace('^', '') }}"
 thiserror = "2.0"
 log = "0.4"
-{% if upstream_crate %}
-
+{%- if upstream_crate %}
 {{ upstream_crate }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }
-{% elif upstream_crates != '' %}
-
-{% for crate in upstream_crates.split(',') %}
+{%- elif upstream_crates != '' %}
+{%- for crate in upstream_crates.split(',') %}
 {{ crate | trim }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }
-{% endfor %}
-{% endif %}
-{% if enable_web %}
+{%- endfor %}
+{%- endif %}
+{%- if enable_web %}
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 # Diamond dependency: some upstream crates use getrandom 0.2, some use 0.3
@@ -36,17 +34,17 @@ wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"
 web-sys = { version = "0.3", features = ["console", "Window", "Performance"] }
-{% endif %}
+{%- endif %}
 
 [profile.release]
 lto = true
 opt-level = "z"
 strip = true
-{% if enable_web %}
+{%- if enable_web %}
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = ["-O4", "--enable-bulk-memory", "--enable-nontrapping-float-to-int"]
-{% endif %}
+{%- endif %}
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ["cfg(frb_expand)"] }

@@ -11,7 +11,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.9.1")
+        classpath("com.android.tools.build:gradle:{{ android_gradle_version }}")
     }
 }
 
@@ -28,9 +28,12 @@ android {
     namespace = "org.{{ package_name }}.{{ package_name }}"
     compileSdk = {{ android_compile_sdk }}
 
+    // NDK version for Rust cross-compilation
+    ndkVersion = "{{ android_ndk_version }}"
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_{{ android_java_version }}
+        targetCompatibility = JavaVersion.VERSION_{{ android_java_version }}
     }
 
     defaultConfig {
