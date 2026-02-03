@@ -1,3 +1,24 @@
+## [1.3.6] - 2026-02-03
+
+### Added
+
+- **"Review Automated PR" section in update skill** — new detailed checklist with 10 steps for reviewing automated dependency update PRs, including:
+  - Analyzing release notes for breaking changes
+  - Fixing Rust compilation errors
+  - Bumping FRB crate version
+  - Syncing Cargo.lock
+
+### Changed
+
+- **Improved check-updates workflow PR instructions:**
+  - Added "Bump `rust/Cargo.toml` version" step to Before Merge section
+  - Added "Run `make rust-check`" step to sync Cargo.lock
+  - Simplified After Merge section (removed redundant rust/Cargo.toml mention)
+- **AI changelog now generates two Highlights lines:**
+  - One for native library version (e.g., `**testlib v1.0.0** — description`)
+  - One for FRB crate version (e.g., `**test_sync_frb v1.0.2** — Rust FFI bindings`)
+  - Added `_readFrbVersion()` function to read crate version from `rust/Cargo.toml`
+
 ## [1.3.5] - 2026-02-03
 
 ### Changed
@@ -203,7 +224,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.5...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.6...HEAD
+[1.3.6]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.2...v1.3.3
