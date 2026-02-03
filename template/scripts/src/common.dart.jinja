@@ -156,7 +156,7 @@ String getCrateVersion() {
 
   return versionMatch.group(1)!.trim();
 }
-{% if upstream_crate %}
+{%- if upstream_crate %}
 
 /// Gets the upstream {{ upstream_crate }} version (git tag) from rust/Cargo.toml.
 ///
@@ -187,7 +187,7 @@ String getUpstreamVersion() {
 
   return versionMatch.group(1)!.trim();
 }
-{% elif upstream_crates %}
+{%- elif upstream_crates %}
 
 /// Gets the upstream version (git tag) from rust/Cargo.toml.
 ///
@@ -219,7 +219,7 @@ String getUpstreamVersion() {
 
   return versionMatch.group(1)!.trim();
 }
-{% endif %}
+{%- endif %}
 
 /// Compares two semantic versions.
 ///
@@ -311,10 +311,9 @@ _VersionParts _parseVersionParts(String version) {
 
 /// Checks if a command exists in PATH.
 Future<bool> commandExists(String command) async {
-  final result = await Process.run(
-    Platform.isWindows ? 'where' : 'which',
-    [command],
-  );
+  final result = await Process.run(Platform.isWindows ? 'where' : 'which', [
+    command,
+  ]);
   return result.exitCode == 0;
 }
 

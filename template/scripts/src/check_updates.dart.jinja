@@ -38,12 +38,12 @@ class UpdateCheckResult {
   final String releaseUrl;
 
   Map<String, dynamic> toJson() => {
-        'current_version': currentVersion,
-        'latest_version': latestVersion,
-        'needs_update': needsUpdate,
-        'is_prerelease': isPrerelease,
-        'release_url': releaseUrl,
-      };
+    'current_version': currentVersion,
+    'latest_version': latestVersion,
+    'needs_update': needsUpdate,
+    'is_prerelease': isPrerelease,
+    'release_url': releaseUrl,
+  };
 }
 
 /// Result of performing an update check with optional update.
@@ -75,11 +75,11 @@ Future<UpdateCheckResult> checkForUpdates({
   bool silent = false,
 }) async {
   // Read current version from rust/Cargo.toml
-{% if upstream_crate or upstream_crates %}
+{%- if upstream_crate or upstream_crates %}
   final currentVersion = getUpstreamVersion();
-{% else %}
+{%- else %}
   final currentVersion = getCrateVersion();
-{% endif %}
+{%- endif %}
 
   if (!silent) {
     logInfo('Current {{ native_library_name }} version: $currentVersion');
@@ -93,7 +93,8 @@ Future<UpdateCheckResult> checkForUpdates({
   if (targetVersion != null) {
     latestVersion = targetVersion;
     isPrerelease = _isPrerelease(latestVersion);
-    releaseUrl = 'https://github.com/$_upstreamRepo/releases/tag/$targetVersion';
+    releaseUrl =
+        'https://github.com/$_upstreamRepo/releases/tag/$targetVersion';
     if (!silent) {
       logInfo('Checking against specified version: $latestVersion');
     }
@@ -104,7 +105,8 @@ Future<UpdateCheckResult> checkForUpdates({
     final release = await _fetchLatestRelease();
     latestVersion = release['tag_name'] as String;
     isPrerelease = release['prerelease'] as bool? ?? false;
-    releaseUrl = release['html_url'] as String? ??
+    releaseUrl =
+        release['html_url'] as String? ??
         'https://github.com/$_upstreamRepo/releases';
     if (!silent) {
       logInfo('Latest upstream version: $latestVersion');
@@ -128,11 +130,11 @@ Future<UpdateCheckResult> checkForUpdates({
 
 /// Normalize version by removing 'v' prefix for comparison.
 String _normalizeVersion(String version) {
-{% if strip_version_prefix %}
+{%- if strip_version_prefix %}
   if (version.startsWith('v')) {
     return version.substring(1);
   }
-{% endif %}
+{%- endif %}
   return version;
 }
 
@@ -146,8 +148,8 @@ bool _isPrerelease(String version) {
 
 /// Fetch the latest release from GitHub API.
 Future<Map<String, dynamic>> _fetchLatestRelease() async {
-  final token = Platform.environment['GITHUB_TOKEN'] ??
-      Platform.environment['GH_TOKEN'];
+  final token =
+      Platform.environment['GITHUB_TOKEN'] ?? Platform.environment['GH_TOKEN'];
 
   final client = HttpClient();
   try {
@@ -167,9 +169,7 @@ Future<Map<String, dynamic>> _fetchLatestRelease() async {
     if (response.statusCode == 200) {
       return jsonDecode(body) as Map<String, dynamic>;
     } else {
-      throw Exception(
-        'Failed to fetch latest release: ${response.statusCode}',
-      );
+      throw Exception('Failed to fetch latest release: ${response.statusCode}');
     }
   } finally {
     client.close();
@@ -179,9 +179,9 @@ Future<Map<String, dynamic>> _fetchLatestRelease() async {
 /// Update upstream version in all relevant files.
 ///
 /// Updates:
-{% if upstream_crate or upstream_crates %}
+{%- if upstream_crate or upstream_crates %}
 /// - rust/Cargo.toml (upstream dependency tag)
-{% endif %}
+{%- endif %}
 /// - README.md (badge) - if exists
 /// - CLAUDE.md (example) - if exists (enable_claude=true)
 /// - SKILL.md (example) - if exists (enable_claude=true)
@@ -194,8 +194,8 @@ Future<List<String>> updateVersionFiles({
 }) async {
   final packageDir = getPackageDir();
   final updatedFiles = <String>[];
+{%- if upstream_crate %}
 
-{% if upstream_crate %}
   // 1. Update rust/Cargo.toml (upstream dependency tag)
   if (!silent) logStep('Updating rust/Cargo.toml...');
   final cargoFile = File('${packageDir.path}/rust/Cargo.toml');
@@ -218,7 +218,7 @@ Future<List<String>> updateVersionFiles({
   await cargoFile.writeAsString(cargoContent);
   updatedFiles.add('rust/Cargo.toml');
   if (!silent) logInfo('Updated rust/Cargo.toml: tag = "$newVersion"');
-{% elif upstream_crates %}
+{%- elif upstream_crates %}
   // 1. Update rust/Cargo.toml (all upstream dependency tags)
   if (!silent) logStep('Updating rust/Cargo.toml...');
   final cargoFile = File('${packageDir.path}/rust/Cargo.toml');
@@ -241,7 +241,7 @@ Future<List<String>> updateVersionFiles({
   await cargoFile.writeAsString(cargoContent);
   updatedFiles.add('rust/Cargo.toml');
   if (!silent) logInfo('Updated rust/Cargo.toml: tag = "$newVersion"');
-{% endif %}
+{%- endif %}
 
   // 2. Update README.md badge (if exists)
   final readmeFile = File('${packageDir.path}/README.md');
@@ -269,10 +269,7 @@ Future<List<String>> updateVersionFiles({
     if (!silent) logStep('Updating CLAUDE.md...');
     var content = claudeFile.readAsStringSync();
     // Replace version in example: tag = "vX.Y.Z"
-    content = content.replaceAll(
-      'tag = "$oldVersion"',
-      'tag = "$newVersion"',
-    );
+    content = content.replaceAll('tag = "$oldVersion"', 'tag = "$newVersion"');
     await claudeFile.writeAsString(content);
     updatedFiles.add('CLAUDE.md');
     if (!silent) logInfo('Updated CLAUDE.md example');
@@ -286,10 +283,7 @@ Future<List<String>> updateVersionFiles({
     if (!silent) logStep('Updating SKILL.md...');
     var content = skillFile.readAsStringSync();
     // Replace version in example: tag = "vX.Y.Z"
-    content = content.replaceAll(
-      'tag = "$oldVersion"',
-      'tag = "$newVersion"',
-    );
+    content = content.replaceAll('tag = "$oldVersion"', 'tag = "$newVersion"');
     await skillFile.writeAsString(content);
     updatedFiles.add('.claude/skills/update-{{ package_name }}/SKILL.md');
     if (!silent) logInfo('Updated SKILL.md example');
@@ -354,10 +348,7 @@ void printJsonOutput({
   required UpdateCheckResult checkResult,
   required bool updated,
 }) {
-  final output = <String, dynamic>{
-    ...checkResult.toJson(),
-    'updated': updated,
-  };
+  final output = <String, dynamic>{...checkResult.toJson(), 'updated': updated};
 
   const encoder = JsonEncoder.withIndent('  ');
   print(encoder.convert(output));

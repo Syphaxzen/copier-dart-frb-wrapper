@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 /// Get version information from rust/Cargo.toml and pubspec.yaml.
 ///
 /// Usage:
@@ -65,8 +66,10 @@ Future<String> _readPackageVersion(Directory packageDir) async {
   }
 
   final content = await pubspecFile.readAsString();
-  final versionMatch = RegExp(r'^version:\s*(.+)$', multiLine: true)
-      .firstMatch(content);
+  final versionMatch = RegExp(
+    r'^version:\s*(.+)$',
+    multiLine: true,
+  ).firstMatch(content);
 
   return versionMatch?.group(1)?.trim() ?? '0.0.0';
 }

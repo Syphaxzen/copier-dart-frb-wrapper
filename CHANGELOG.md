@@ -1,3 +1,13 @@
+## [1.3.3] - 2026-02-03
+
+### Fixed
+
+- **Dart formatting compliance** — all generated `.dart` files now pass `dart format --set-exit-if-changed`:
+  - Added blank line after shebang (`#!/usr/bin/env dart`) in scripts
+  - Fixed Jinja2 whitespace handling using `{%-` / `-%}` syntax to prevent extra blank lines
+  - Corrected indentation in long expressions (Process.run, Map literals, replaceAll, etc.)
+  - Removed extra blank lines in test files and conditional blocks
+
 ## [1.3.2] - 2026-02-03
 
 ### Added
@@ -177,7 +187,9 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.1...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.3...HEAD
+[1.3.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.2...v1.3.3
+[1.3.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.1...v1.3.2
 [1.3.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.1.0...v1.2.0

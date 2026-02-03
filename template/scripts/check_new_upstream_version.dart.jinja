@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 /// Check for {{ native_library_name }} updates.
 ///
 /// This script checks for new {{ native_library_name }} releases and optionally updates
@@ -27,7 +28,7 @@
 ///   fvm dart run scripts/check_new_upstream_version.dart --update --ci
 ///
 ///   # Update to specific version
-///   fvm dart run scripts/check_new_upstream_version.dart --update --version {{ upstream_version }}
+///   fvm dart run scripts/check_new_upstream_version.dart --update --version {{ upstream_version | default('v1.0.0', true) }}
 ///
 ///   # Output JSON for scripting
 ///   fvm dart run scripts/check_new_upstream_version.dart --json

@@ -1,4 +1,5 @@
 #!/usr/bin/env dart
+
 /// Check if a FRB release already exists on GitHub.
 ///
 /// Usage:
@@ -48,9 +49,9 @@ void main(List<String> args) async {
       final file = File(outputFile);
       final buffer = StringBuffer()
         ..writeln('version=$version')
-{% if upstream_crate or upstream_crates %}
+{%- if upstream_crate or upstream_crates %}
         ..writeln('{{ package_name }}_version=$upstreamVersion')
-{% endif %}
+{%- endif %}
         ..writeln('skip=${releaseExists ? 'true' : 'false'}');
       file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
     }
