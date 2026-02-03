@@ -1,3 +1,36 @@
+## [1.3.1] - 2026-02-03
+
+### Added
+
+- **Widget test for Flutter example app** — new `example_widget_test.dart.jinja` with basic app tests
+
+### Changed
+
+- **analysis_options.yaml improvements:**
+  - Added exclude for FRB-generated files (`lib/src/rust/**`)
+  - Added exclude for build scripts (`hook/**`, `scripts/**`)
+- **FVM setup command** — changed `fvm install` to `fvm use --force` for more reliable setup
+- **Example apps cleanup:**
+  - Flutter example now uses custom widget test instead of default
+  - CLI example removes default `test/` and `lib/` directories
+- **Code style improvements across templates:**
+  - Class fields moved after constructors (Dart style guide)
+  - Cascade notation (`..writeln`) for StringBuffer operations
+  - Tear-off syntax for callbacks (`tearDown(cleanup)`)
+  - Better JSON type casting in platform_io.dart and update_changelog.dart
+- **Script documentation** — improved doc comments with proper formatting and `library;` directives
+- **Unused import warnings** — added `// ignore: unused_import` in example apps
+
+### Fixed
+
+- **Lint compliance** — added appropriate `ignore_for_file` directives:
+  - `avoid_dynamic_calls` in platform_io.dart
+  - `avoid_classes_with_only_static_members` in common.dart
+- **Test file improvements:**
+  - Fixed import order (test package first)
+  - Simplified test assertions using `returnsNormally`
+  - Removed redundant version tests
+
 ## [1.3.0] - 2026-02-02
 
 ### Added
@@ -128,7 +161,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.0.0...v1.1.0

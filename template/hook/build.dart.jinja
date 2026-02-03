@@ -207,7 +207,7 @@ Directory? _findLocalWasmBuild(Uri packageRoot) {
 /// 1. First checks for local WASM build (development mode)
 /// 2. Otherwise downloads WASM files from GitHub Releases to a shared cache
 /// 3. Finds the Flutter app root (the consuming application)
-/// 4. Copies WASM files to <app_root>/web/pkg/ where Flutter web expects them
+/// 4. Copies WASM files to `{app_root}/web/pkg/` where Flutter web expects them
 Future<void> _handleWebBuild(BuildInput input, Uri packageRoot) async {
   // Find the Flutter app root first
   final appRoot = _findAppRoot(input.outputDirectoryShared);
@@ -400,17 +400,17 @@ String _getLibraryFileName(OS targetOS) {
 
 /// Information about a native asset for a specific platform.
 class _AssetInfo {
-  final String downloadUrl;
-  final String archiveFileName;
-  final String fileName;
-  final LinkMode linkMode;
-
   const _AssetInfo({
     required this.downloadUrl,
     required this.archiveFileName,
     required this.fileName,
     required this.linkMode,
   });
+
+  final String downloadUrl;
+  final String archiveFileName;
+  final String fileName;
+  final LinkMode linkMode;
 }
 
 /// Resolves asset information for the target platform.
@@ -627,7 +627,7 @@ Future<void> _downloadWithRetry(
       } catch (e) {
         lastError = e is Exception ? e : Exception(e.toString());
         if (attempt < maxRetries) {
-          await Future.delayed(retryDelay * attempt);
+          await Future<void>.delayed(retryDelay * attempt);
         }
       }
     }
@@ -770,8 +770,9 @@ Future<void> _verifyChecksum(
 
 /// Custom exception for hook errors.
 class HookException implements Exception {
-  final String message;
   HookException(this.message);
+
+  final String message;
 
   @override
   String toString() => 'HookException: $message';

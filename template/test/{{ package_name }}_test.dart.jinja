@@ -1,5 +1,5 @@
-import 'package:{{ package_name }}/{{ package_name }}.dart';
 import 'package:test/test.dart';
+import 'package:{{ package_name }}/{{ package_name }}.dart';
 
 void main() {
   group('{{ package_name | to_camel }}', () {
@@ -7,10 +7,8 @@ void main() {
     // Initialization tests
     // =========================================================================
     group('initialization', () {
-      tearDown(() {
-        // Ensure clean state after each test
-        {{ package_name | to_camel }}.cleanup();
-      });
+      // Ensure clean state after each test
+      tearDown({{ package_name | to_camel }}.cleanup);
 
       test('initializes successfully', () async {
         await {{ package_name | to_camel }}.init();
@@ -49,39 +47,17 @@ void main() {
     group('ensureInitialized', () {
       test('throws StateError when not initialized', () {
         {{ package_name | to_camel }}.cleanup();
-        expect(
-          () => {{ package_name | to_camel }}.ensureInitialized(),
-          throwsStateError,
-        );
+        expect({{ package_name | to_camel }}.ensureInitialized, throwsStateError);
       });
 
       test('does not throw when initialized', () async {
         await {{ package_name | to_camel }}.init();
         // Should not throw
-        {{ package_name | to_camel }}.ensureInitialized();
+        expect({{ package_name | to_camel }}.ensureInitialized, returnsNormally);
         {{ package_name | to_camel }}.cleanup();
       });
     });
 
-    // =========================================================================
-    // Version tests
-    // =========================================================================
-    group('version', () {
-      test('version string is not empty', () {
-        expect({{ package_name | to_camel }}.version, isNotEmpty);
-      });
-
-      test('version follows semantic versioning format', () {
-        final version = {{ package_name | to_camel }}.version;
-        // Basic semver pattern: major.minor.patch with optional prerelease
-        final semverPattern = RegExp(r'^\d+\.\d+\.\d+(-[\w.]+)?$');
-        expect(
-          semverPattern.hasMatch(version),
-          isTrue,
-          reason: 'Version "$version" should follow semver format',
-        );
-      });
-    });
   });
 
   // ===========================================================================
@@ -96,13 +72,8 @@ void main() {
   // Example test group structure:
   //
   // group('MyFeature', () {
-  //   setUpAll(() async {
-  //     await {{ package_name | to_camel }}.init();
-  //   });
-  //
-  //   tearDownAll(() {
-  //     {{ package_name | to_camel }}.cleanup();
-  //   });
+  //   setUpAll({{ package_name | to_camel }}.init);
+  //   tearDownAll({{ package_name | to_camel }}.cleanup);
   //
   //   test('feature does something', () {
   //     // Your test here

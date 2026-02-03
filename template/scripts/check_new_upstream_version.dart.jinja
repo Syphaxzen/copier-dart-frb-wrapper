@@ -1,6 +1,5 @@
 #!/usr/bin/env dart
-
-/// Check for {{ native_library_name }} updates
+/// Check for {{ native_library_name }} updates.
 ///
 /// This script checks for new {{ native_library_name }} releases and optionally updates
 /// the upstream dependency tag in rust/Cargo.toml.
@@ -9,14 +8,15 @@
 ///   fvm dart run scripts/check_new_upstream_version.dart [options]
 ///
 /// Options:
-///   --update          Update rust/Cargo.toml if new version available
-///   --version <ver>   Check/update to specific version
-///   --force           Force update even if versions match
-///   --json            Output results as JSON
-///   --ci              CI mode: write to GITHUB_OUTPUT
-///   --help, -h        Show this help
+///   - `--update`          Update rust/Cargo.toml if new version available
+///   - `--version [ver]`   Check/update to specific version
+///   - `--force`           Force update even if versions match
+///   - `--json`            Output results as JSON
+///   - `--ci`              CI mode: write to GITHUB_OUTPUT
+///   - `--help, -h`        Show this help
 ///
 /// Examples:
+///   ```bash
 ///   # Just check for updates
 ///   fvm dart run scripts/check_new_upstream_version.dart
 ///
@@ -31,6 +31,8 @@
 ///
 ///   # Output JSON for scripting
 ///   fvm dart run scripts/check_new_upstream_version.dart --json
+///   ```
+library;
 
 import 'dart:io';
 

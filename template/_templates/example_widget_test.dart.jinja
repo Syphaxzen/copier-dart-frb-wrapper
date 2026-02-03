@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:{{ package_name }}_example/main.dart';
+
+void main() {
+  testWidgets('App builds successfully', (WidgetTester tester) async {
+    await tester.pumpWidget(const {{ package_name | to_camel }}ExampleApp());
+
+    // Verify app title is displayed
+    expect(find.text('{{ package_name }} Example'), findsOneWidget);
+
+    // Verify Run Demo button exists
+    expect(find.text('Run Demo'), findsOneWidget);
+  });
+
+  testWidgets('Run Demo button triggers demo', (WidgetTester tester) async {
+    await tester.pumpWidget(const {{ package_name | to_camel }}ExampleApp());
+
+    // Tap the Run Demo button
+    await tester.tap(find.text('Run Demo'));
+    await tester.pump();
+
+    // Verify demo output appears
+    expect(find.textContaining('Running demo...'), findsOneWidget);
+  });
+}

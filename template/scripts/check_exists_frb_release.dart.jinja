@@ -46,13 +46,13 @@ void main(List<String> args) async {
     final outputFile = Platform.environment['GITHUB_OUTPUT'];
     if (outputFile != null) {
       final file = File(outputFile);
-      final buffer = StringBuffer();
-      buffer.writeln('version=$version');
+      final buffer = StringBuffer()
+        ..writeln('version=$version')
 {% if upstream_crate or upstream_crates %}
-      buffer.writeln('{{ package_name }}_version=$upstreamVersion');
+        ..writeln('{{ package_name }}_version=$upstreamVersion')
 {% endif %}
-      buffer.writeln('skip=${releaseExists ? 'true' : 'false'}');
-      await file.writeAsString(buffer.toString(), mode: FileMode.append);
+        ..writeln('skip=${releaseExists ? 'true' : 'false'}');
+      file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
     }
 
     if (releaseExists) {

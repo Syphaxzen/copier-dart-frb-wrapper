@@ -1,7 +1,8 @@
-/// Update CHANGELOG.md with AI-generated entry for {{ native_library_name }} update
-///
-/// Uses GitHub Models API (OpenAI-compatible) to analyze release notes
-/// and generate appropriate changelog entries.
+// Update CHANGELOG.md with AI-generated entry for {{ native_library_name }} update.
+//
+// Uses GitHub Models API (OpenAI-compatible) to analyze release notes
+// and generate appropriate changelog entries.
+library;
 
 import 'dart:convert';
 import 'dart:io';
@@ -173,12 +174,19 @@ Return ONLY valid JSON, no markdown code blocks.
     throw Exception('API error: ${error['message']}');
   }
 
-  final choices = response['choices'] as List;
-  if (choices.isEmpty) {
+  final choices = response['choices'] as List<Object?>?;
+  if (choices == null || choices.isEmpty) {
     throw Exception('No response from AI');
   }
 
-  final message = choices[0]['message'] as Map<String, dynamic>;
+  final firstChoice = choices[0];
+  if (firstChoice is! Map<String, dynamic>) {
+    throw Exception('Invalid response format from AI');
+  }
+  final message = firstChoice['message'] as Map<String, dynamic>?;
+  if (message == null) {
+    throw Exception('No message in AI response');
+  }
   final content = (message['content'] as String).trim();
 
   // Parse JSON response
@@ -304,9 +312,7 @@ String _insertIntoUnreleased(
 
     // Check for #### ✨ Highlights in For Users
     if (inForUsers && line.contains('Highlights')) {
-      result.add(line);
-      result.add('');
-      result.add('- $highlights');
+      result.addAll([line, '', '- $highlights']);
       insertedHighlights = true;
       // Skip the next empty line if present
       if (i + 1 < lines.length && lines[i + 1].trim().isEmpty) {
@@ -322,9 +328,7 @@ String _insertIntoUnreleased(
         result.addAll(['', '#### ✨ Highlights', '', '- $highlights', '']);
         insertedHighlights = true;
       }
-      result.add(line);
-      result.add('');
-      result.add(changed);
+      result.addAll([line, '', changed]);
       insertedChanged = true;
       // Skip the next empty line if present
       if (i + 1 < lines.length && lines[i + 1].trim().isEmpty) {
@@ -356,27 +360,24 @@ String _createUnreleasedSection(
     }
   }
 
-  // Add lines before first version
-  result.addAll(lines.sublist(0, insertIndex));
-
-  // Add Unreleased section with Highlights and Changed
-  result.addAll([
-    '## [Unreleased]',
-    '',
-    '### For Users',
-    '',
-    '#### ✨ Highlights',
-    '',
-    '- $highlights',
-    '',
-    '#### Changed',
-    '',
-    changed,
-    '',
-  ]);
-
-  // Add remaining lines
-  result.addAll(lines.sublist(insertIndex));
+  // Add lines before first version, Unreleased section, and remaining lines
+  result
+    ..addAll(lines.sublist(0, insertIndex))
+    ..addAll([
+      '## [Unreleased]',
+      '',
+      '### For Users',
+      '',
+      '#### ✨ Highlights',
+      '',
+      '- $highlights',
+      '',
+      '#### Changed',
+      '',
+      changed,
+      '',
+    ])
+    ..addAll(lines.sublist(insertIndex));
 
   return result.join('\n');
 }

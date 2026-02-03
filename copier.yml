@@ -246,7 +246,7 @@ _tasks:
       --org com.{{ package_name }}
     working_directory: "{{ _copier_conf.dst_path }}"
 
-  # Copy template files to example
+  # Copy template files to example and remove default widget_test.dart
   - command: >-
       cp _templates/example_pubspec.yaml example/pubspec.yaml &&
       cp _templates/example_main.dart example/lib/main.dart &&
@@ -254,20 +254,22 @@ _tasks:
       cp _templates/example_ios_debug.xcconfig example/ios/Flutter/Debug.xcconfig &&
       cp _templates/example_ios_release.xcconfig example/ios/Flutter/Release.xcconfig &&
       cp _templates/example_macos_debug.xcconfig example/macos/Flutter/Flutter-Debug.xcconfig &&
-      cp _templates/example_macos_release.xcconfig example/macos/Flutter/Flutter-Release.xcconfig
+      cp _templates/example_macos_release.xcconfig example/macos/Flutter/Flutter-Release.xcconfig &&
+      cp _templates/example_widget_test.dart example/test/widget_test.dart
     working_directory: "{{ _copier_conf.dst_path }}"
 
   # Create CLI example app
   - command: dart create -t console example_cli --force
     working_directory: "{{ _copier_conf.dst_path }}"
 
-  # Copy template files to example_cli and cleanup
+  # Copy template files to example_cli and cleanup (remove default test and lib)
   - command: >-
       cp _templates/example_cli_pubspec.yaml example_cli/pubspec.yaml &&
       cp _templates/example_cli_main.dart example_cli/bin/{{ package_name }}_cli.dart &&
       cp _templates/example_cli_gitignore example_cli/.gitignore &&
       cp _templates/example_cli_analysis_options.yaml example_cli/analysis_options.yaml &&
-      rm -f example_cli/bin/example_cli.dart
+      rm -f example_cli/bin/example_cli.dart &&
+      rm -rf example_cli/test example_cli/lib
     working_directory: "{{ _copier_conf.dst_path }}"
 
   # Remove _templates directory

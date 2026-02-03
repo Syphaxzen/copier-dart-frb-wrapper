@@ -1,4 +1,5 @@
 /// IO-specific platform implementations for native platforms.
+// ignore_for_file: avoid_dynamic_calls
 library;
 
 import 'dart:convert';
@@ -105,11 +106,13 @@ String? findPackageRoot() {
   if (!configFile.existsSync()) return null;
 
   try {
-    final content = jsonDecode(configFile.readAsStringSync());
-    final packages = content['packages'] as List?;
+    final content =
+        jsonDecode(configFile.readAsStringSync()) as Map<String, dynamic>;
+    final packages = content['packages'] as List<Object?>?;
     if (packages == null) return null;
 
     for (final pkg in packages) {
+      if (pkg is! Map<String, dynamic>) continue;
       if (pkg['name'] == '{{ package_name }}') {
         final rootUri = pkg['rootUri'] as String?;
         if (rootUri == null) continue;
