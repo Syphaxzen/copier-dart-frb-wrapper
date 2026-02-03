@@ -1,3 +1,13 @@
+## [1.3.5] - 2026-02-03
+
+### Changed
+
+- **`create-project` skill improvements:**
+  - Added complete post-generation workflow with numbered steps
+  - Added warning that `make build` is required before `make test`
+  - Added "Quality Verification" section with all quality checks (`make analyze`, `make test`, `make format-check`, `make rust-check`, `make rust-audit`, `make publish-dry-run`)
+  - Added "Platform-Specific Builds" section
+
 ## [1.3.4] - 2026-02-03
 
 ### Added
@@ -193,7 +203,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.4...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.5...HEAD
+[1.3.5]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.2...v1.3.3
 [1.3.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.1...v1.3.2

@@ -202,23 +202,60 @@ copier copy https://github.com/djx-y-z/copier-dart-frb-wrapper ~/projects/custom
 After project generation, the template runs these tasks automatically:
 
 1. `git init` - Initialize git repository
-2. Create `example_cli/` - Dart CLI example app
-3. Create `example/` - Flutter example app
+2. Create `example/` - Flutter example app
+3. Create `example_cli/` - Dart CLI example app
 
-Then manually:
+Then manually run these commands **in order**:
 
 ```bash
 cd /path/to/destination/package_name
 
-# Install dependencies
+# 1. Install dependencies (FVM, Flutter, Rust tools)
 make setup
 
-# Generate Flutter Rust Bridge code
+# 2. Generate Dart bindings from Rust code
 make codegen
 
-# Build for your platform
-make build-macos  # or build-linux, build-windows, build-android, build-ios
+# 3. Build native library for current platform
+make build
+
+# 4. Run static analysis
+make analyze
+
+# 5. Run tests (REQUIRES make build first!)
+make test
 ```
+
+> **Important:** `make build` must be run before `make test`. The build hook checks for a local library in `rust/target/release/`. If not found, it tries to download from GitHub Releases, which won't exist for a new project.
+
+### Platform-Specific Builds
+
+```bash
+# Current platform (auto-detected)
+make build
+
+# Android (all ABIs)
+make build-android
+
+# Web/WASM (if enable_web=true)
+make build-web
+```
+
+## Quality Verification
+
+A correctly generated project should pass all quality checks:
+
+```bash
+# All these commands should complete without errors
+make analyze        # No issues found
+make test           # All tests passed
+make format-check   # No formatting issues
+make rust-check     # Rust code compiles
+make rust-audit     # No security vulnerabilities
+make publish-dry-run  # Package validates (0 warnings)
+```
+
+If any of these fail on a freshly generated project, it indicates a bug in the template that should be fixed.
 
 ## Updating Existing Projects
 
