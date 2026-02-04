@@ -64,7 +64,7 @@ make check-new-{{ package_name }}-version
 make check-new-{{ package_name }}-version ARGS="--update --version v1.0.0"
 
 # 3. Update Cargo.lock
-make update
+make rust-update
 
 # 4. Regenerate bindings
 make codegen

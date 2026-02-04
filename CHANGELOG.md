@@ -1,3 +1,15 @@
+## [1.5.0] - 2026-02-04
+
+### Changed
+
+- **Renamed `make update` → `make rust-update`** — clearer naming indicating this command updates Rust dependencies (Cargo.lock)
+- **Synchronized `hook/build.dart.jinja` with reference project:**
+  - Added section separator comments (`// ===`) for Web Build Support, Native Build Support, Download Support
+  - Simplified `_AssetInfo` class — removed `linkMode` field (always `DynamicLoadingBundled()`)
+  - Simplified `_resolveAssetInfo` — uses new `_getPlatformArchName` helper
+  - Replaced `_linuxArchName`, `_macOSArchName`, `_iOSTargetName` with unified `_archName` and `_getPlatformArchName`
+  - Added extended documentation header with "How it works" and "For development" sections
+
 ## [1.4.0] - 2026-02-04
 
 ### Fixed
@@ -244,7 +256,9 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.6...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.4.0...v1.5.0
+[1.4.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.6...v1.4.0
 [1.3.6]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.5...v1.3.6
 [1.3.5]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.4...v1.3.5
 [1.3.4]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.3...v1.3.4

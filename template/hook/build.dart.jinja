@@ -5,6 +5,34 @@
 ///
 /// The hook downloads pre-built native libraries from GitHub Releases
 /// based on the target platform and architecture.
+///
+/// ## How it works
+///
+/// ### Native platforms (iOS, Android, macOS, Linux, Windows)
+/// 1. Hook downloads the appropriate `{{ crate_name }}` binary for the target
+/// 2. Registers it as a CodeAsset with asset ID `package:{{ package_name }}/{{ package_name }}`
+/// 3. Dart runtime bundles and loads the asset automatically
+{%- if enable_web %}
+///
+/// ### Web platform
+/// 1. Hook detects web build (no code_assets config)
+/// 2. Downloads WASM files to `<app_root>/web/pkg/`
+/// 3. FRB loads WASM at runtime from that location
+{%- endif %}
+///
+/// ## For development
+///
+/// If you have Rust installed and want to build from source instead:
+/// ```bash
+/// # Native platforms
+/// make build
+{%- if enable_web %}
+///
+/// # Web/WASM
+/// make build-web
+{%- endif %}
+/// ```
+/// Then create `.skip_{{ package_name }}_hook` file to skip downloading.
 library;
 
 import 'dart:io';
@@ -143,7 +171,7 @@ void main(List<String> args) async {
       CodeAsset(
         package: _packageName,
         name: _assetId,
-        linkMode: assetInfo.linkMode,
+        linkMode: DynamicLoadingBundled(),
         file: libFile.uri,
       ),
     );
@@ -175,6 +203,10 @@ Future<String> _readVersion(Uri packageRoot) async {
   return versionMatch.group(1)!.trim();
 }
 {%- if enable_web %}
+
+// =============================================================================
+// Web Build Support
+// =============================================================================
 
 /// Checks if all required WASM files exist in a directory.
 bool _wasmFilesExist(Directory dir) {
@@ -361,6 +393,10 @@ Future<void> _copyWasmFilesToAppRoot(Uri cacheDir, Directory webPkgDir) async {
   }
 }
 {% endif %}
+// =============================================================================
+// Native Build Support
+// =============================================================================
+
 /// Looks for locally built library in rust/target/.
 ///
 /// This function enables development mode where developers can use
@@ -404,13 +440,11 @@ class _AssetInfo {
     required this.downloadUrl,
     required this.archiveFileName,
     required this.fileName,
-    required this.linkMode,
   });
 
   final String downloadUrl;
   final String archiveFileName;
   final String fileName;
-  final LinkMode linkMode;
 }
 
 /// Resolves asset information for the target platform.
@@ -420,66 +454,57 @@ _AssetInfo _resolveAssetInfo(CodeConfig codeConfig, String version) {
   final targetOS = codeConfig.targetOS;
   final targetArch = codeConfig.targetArchitecture;
 
+  final fileName = _getLibraryFileName(targetOS);
+  final platformArch = _getPlatformArchName(codeConfig);
+
+  final archiveFileName = '$_crateName-$version-$platformArch.tar.gz';
+
+  return _AssetInfo(
+    downloadUrl: '$baseUrl/$archiveFileName',
+    archiveFileName: archiveFileName,
+    fileName: fileName,
+  );
+}
+
+/// Gets platform-architecture name for download URL.
+String _getPlatformArchName(CodeConfig codeConfig) {
+  final targetOS = codeConfig.targetOS;
+  final targetArch = codeConfig.targetArchitecture;
+
   switch (targetOS) {
     case OS.linux:
-      final linuxArch = _linuxArchName(targetArch);
-      return _AssetInfo(
-        downloadUrl: '$baseUrl/$_crateName-$version-linux-$linuxArch.tar.gz',
-        archiveFileName: '$_crateName-$version-linux-$linuxArch.tar.gz',
-        fileName: 'lib$_crateName.so',
-        linkMode: DynamicLoadingBundled(),
-      );
-
+      return 'linux-${_archName(targetArch)}';
     case OS.macOS:
-      // Use architecture-specific binaries (Flutter will merge them with lipo)
-      final arch = _macOSArchName(targetArch);
-      return _AssetInfo(
-        downloadUrl: '$baseUrl/$_crateName-$version-macos-$arch.tar.gz',
-        archiveFileName: '$_crateName-$version-macos-$arch.tar.gz',
-        fileName: 'lib$_crateName.dylib',
-        linkMode: DynamicLoadingBundled(),
-      );
-
+      return 'macos-${_archName(targetArch)}';
     case OS.windows:
-      return _AssetInfo(
-        downloadUrl: '$baseUrl/$_crateName-$version-windows-x86_64.tar.gz',
-        archiveFileName: '$_crateName-$version-windows-x86_64.tar.gz',
-        fileName: '$_crateName.dll',
-        linkMode: DynamicLoadingBundled(),
-      );
-
+      return 'windows-x86_64';
     case OS.android:
-      final abi = _androidArchToAbi(targetArch);
-      return _AssetInfo(
-        downloadUrl: '$baseUrl/$_crateName-$version-android-$abi.tar.gz',
-        archiveFileName: '$_crateName-$version-android-$abi.tar.gz',
-        fileName: 'lib$_crateName.so',
-        linkMode: DynamicLoadingBundled(),
-      );
-
+      return 'android-${_androidAbi(targetArch)}';
     case OS.iOS:
-      // iOS: Use DynamicLoadingBundled - Flutter automatically converts
-      // .dylib to Framework format required by App Store.
-      //
-      // We download architecture-specific .dylib files:
-      // - device-arm64 for physical devices
-      // - simulator-arm64 for Apple Silicon simulators
-      // - simulator-x86_64 for Intel simulators
-      final iosTarget = _iOSTargetName(codeConfig, targetArch);
-      return _AssetInfo(
-        downloadUrl: '$baseUrl/$_crateName-$version-ios-$iosTarget.tar.gz',
-        archiveFileName: '$_crateName-$version-ios-$iosTarget.tar.gz',
-        fileName: 'lib$_crateName.dylib',
-        linkMode: DynamicLoadingBundled(),
-      );
-
+      final isSimulator = codeConfig.iOS.targetSdk == IOSSdk.iPhoneSimulator;
+      if (isSimulator) {
+        return 'ios-simulator-${_archName(targetArch)}';
+      }
+      return 'ios-device-arm64';
     default:
-      throw HookException('Unsupported target OS: $targetOS');
+      throw HookException('Unsupported OS: $targetOS');
+  }
+}
+
+/// Converts Dart Architecture to architecture name (arm64/x86_64).
+String _archName(Architecture arch) {
+  switch (arch) {
+    case Architecture.arm64:
+      return 'arm64';
+    case Architecture.x64:
+      return 'x86_64';
+    default:
+      throw HookException('Unsupported architecture: $arch');
   }
 }
 
 /// Converts Dart Architecture to Android ABI name.
-String _androidArchToAbi(Architecture arch) {
+String _androidAbi(Architecture arch) {
   switch (arch) {
     case Architecture.arm64:
       return 'arm64-v8a';
@@ -492,60 +517,9 @@ String _androidArchToAbi(Architecture arch) {
   }
 }
 
-/// Converts Dart Architecture to macOS architecture name.
-String _macOSArchName(Architecture arch) {
-  switch (arch) {
-    case Architecture.arm64:
-      return 'arm64';
-    case Architecture.x64:
-      return 'x86_64';
-    default:
-      throw HookException('Unsupported macOS architecture: $arch');
-  }
-}
-
-/// Converts Dart Architecture to Linux architecture name.
-String _linuxArchName(Architecture arch) {
-  switch (arch) {
-    case Architecture.arm64:
-      return 'arm64';
-    case Architecture.x64:
-      return 'x86_64';
-    default:
-      throw HookException('Unsupported Linux architecture: $arch');
-  }
-}
-
-/// Determines iOS target name based on CodeConfig.
-///
-/// For iOS, we need to determine if we're building for device or simulator,
-/// and which architecture. The CodeConfig provides this information.
-String _iOSTargetName(CodeConfig codeConfig, Architecture arch) {
-  // Check if building for simulator by looking at the iOS SDK
-  // iOS simulators use iphonesimulator SDK, devices use iphoneos SDK
-  // The CodeConfig.iOS.targetSdk property tells us which one
-  final isSimulator = codeConfig.iOS.targetSdk == IOSSdk.iPhoneSimulator;
-
-  if (isSimulator) {
-    // Simulator: can be arm64 (Apple Silicon) or x86_64 (Intel)
-    switch (arch) {
-      case Architecture.arm64:
-        return 'simulator-arm64';
-      case Architecture.x64:
-        return 'simulator-x86_64';
-      default:
-        throw HookException('Unsupported iOS simulator architecture: $arch');
-    }
-  } else {
-    // Device: always arm64
-    if (arch != Architecture.arm64) {
-      throw HookException(
-        'Unsupported iOS device architecture: $arch (only arm64 is supported)',
-      );
-    }
-    return 'device-arm64';
-  }
-}
+// =============================================================================
+// Download Support
+// =============================================================================
 
 /// Downloads and extracts the native library archive with SHA256 verification.
 ///

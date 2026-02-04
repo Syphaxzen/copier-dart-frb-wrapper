@@ -37,7 +37,7 @@ make build --target aarch64-apple-darwin  # make interprets --target as its own 
 | Audit Rust dependencies | `make rust-audit` |
 | Get dependencies | `make get` |
 | Show crate version | `make version` |
-| Update Cargo.lock | `make update` |
+| Update Cargo.lock | `make rust-update` |
 | Update CHANGELOG with AI | `make update-changelog ARGS="--version v1.0.0"` |
 
 ## Available Makefile Commands
@@ -197,7 +197,7 @@ To check/update the version:
 ```bash
 make check-new-{{ package_name }}-version              # Check for updates
 make check-new-{{ package_name }}-version ARGS="--update"  # Apply update
-make update                         # Update Cargo.lock after version bump
+make rust-update                    # Update Cargo.lock after version bump
 make update-changelog ARGS="--version v1.0.0"  # Generate AI changelog entry
 ```
 

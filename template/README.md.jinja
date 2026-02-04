@@ -151,7 +151,7 @@ make build-web
 make check-new-{{ package_name }}-version
 
 # Update Cargo.lock dependencies
-make update
+make rust-update
 
 # Generate AI-powered changelog entry (requires AI_MODELS_TOKEN)
 make update-changelog ARGS="--version v1.0.0"
