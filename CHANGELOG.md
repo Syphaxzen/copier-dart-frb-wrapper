@@ -1,3 +1,9 @@
+## [1.7.2] - 2026-02-05
+
+### Changed
+
+- **`update-template` Claude skill** — document manual `_commit` update in `.copier-answers.yml` when copier fails to update it (merge conflicts or no file changes)
+
 ## [1.7.1] - 2026-02-05
 
 ### Added
