@@ -83,12 +83,12 @@ jobs:
       # Setup Rust toolchain for building native library
       - name: Setup Rust
         uses: ./.github/actions/setup-rust
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       # Install protobuf compiler (required by some native libraries)
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Setup FVM and Flutter
         uses: ./.github/actions/setup-fvm

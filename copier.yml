@@ -243,10 +243,12 @@ _tasks:
     working_directory: "{{ _copier_conf.dst_path }}"
 
   # Create Flutter example app
+  # Note: --project-name=example creates applicationId=com.{package_name}.example
+  # and Kotlin path com/{package_name}/example/MainActivity.kt
   - command: >-
       flutter create example
       --platforms=android,ios,linux,macos,windows{% if enable_web %},web{% endif %}
-      --project-name {{ package_name }}_example
+      --project-name example
       --org com.{{ package_name }}
     working_directory: "{{ _copier_conf.dst_path }}"
 
@@ -269,7 +271,7 @@ _tasks:
   # Copy template files to example_cli and cleanup (remove default test and lib)
   - command: >-
       cp _templates/example_cli_pubspec.yaml example_cli/pubspec.yaml &&
-      cp _templates/example_cli_main.dart example_cli/bin/{{ package_name }}_cli.dart &&
+      cp _templates/example_cli_main.dart example_cli/bin/main.dart &&
       cp _templates/example_cli_gitignore example_cli/.gitignore &&
       cp _templates/example_cli_analysis_options.yaml example_cli/analysis_options.yaml &&
       rm -f example_cli/bin/example_cli.dart &&
@@ -288,6 +290,10 @@ _tasks:
   - command: rm -rf CLAUDE.md .claude
     working_directory: "{{ _copier_conf.dst_path }}"
     when: "{{ not enable_claude }}"
+
+  # Format generated Dart code
+  - command: dart format .
+    working_directory: "{{ _copier_conf.dst_path }}"
 
 # =============================================================================
 # Messages

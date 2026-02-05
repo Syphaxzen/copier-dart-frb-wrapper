@@ -99,14 +99,14 @@ jobs:
         if: steps.check.outputs.needs_update == 'true'
         continue-on-error: true
         uses: ./.github/actions/setup-rust
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup protoc
         id: setup-protoc
         if: steps.check.outputs.needs_update == 'true'
         continue-on-error: true
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Update Cargo.lock
         id: cargo-lock
@@ -180,9 +180,9 @@ jobs:
             - `lib/src/rust/` — ${{"{{"}} steps.codegen.outputs.success == 'true' && 'regenerated FRB bindings' || '**NOT UPDATED** (codegen failed, manual update required)' {{"}}"}}
             - `CHANGELOG.md` — ${{"{{"}} steps.changelog.outputs.success == 'true' && 'AI-generated entry (GitHub Models)' || '**NOT UPDATED** (AI failed, manual update required)' {{"}}"}}
             - `README.md` — ${{"{{"}} steps.cargo-toml.outputs.success == 'true' && 'version badge' || '**NOT UPDATED**' {{"}}"}}
-            {% if enable_claude %}- `CLAUDE.md` — ${{"{{"}} steps.cargo-toml.outputs.success == 'true' && 'example in documentation' || '**NOT UPDATED**' {{"}}"}}
-            - `.claude/skills/update-{{ package_name }}/SKILL.md` — ${{"{{"}} steps.cargo-toml.outputs.success == 'true' && 'example in skill' || '**NOT UPDATED**' {{"}}"}}
-            {% endif %}
+{%- if enable_claude %}
+            - `CLAUDE.md` — ${{"{{"}} steps.cargo-toml.outputs.success == 'true' && 'example in documentation' || '**NOT UPDATED**' {{"}}"}}
+{%- endif %}
 
             ### Release Notes
 

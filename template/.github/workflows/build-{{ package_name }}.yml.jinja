@@ -9,9 +9,9 @@
 # - iOS device arm64, simulator arm64/x86_64 (dynamic .dylib)
 # - Android arm64-v8a, armeabi-v7a, x86_64 (dynamic .so)
 # - Windows x86_64 (dynamic .dll)
-{% if enable_web %}
+{%- if enable_web %}
 # - Web (WASM)
-{% endif %}
+{%- endif %}
 #
 # Trigger:
 # - Manual dispatch (workflow_dispatch) - for first run or force rebuild
@@ -44,9 +44,9 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{"{{"}} steps.check.outputs.version {{"}}"}}
-{% if upstream_crate or upstream_crates %}
+{%- if upstream_crate or upstream_crates %}
       {{ package_name }}_version: ${{"{{"}} steps.check.outputs.{{ package_name }}_version {{"}}"}}
-{% endif %}
+{%- endif %}
       skip: ${{"{{"}} steps.check.outputs.skip {{"}}"}}
     steps:
       - uses: actions/checkout@v4
@@ -83,11 +83,11 @@ jobs:
         uses: ./.github/actions/setup-rust
         with:
           targets: ${{"{{"}} matrix.rust_target {{"}}"}}
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for Linux ${{"{{"}} matrix.arch {{"}}"}}
         run: |
@@ -123,11 +123,11 @@ jobs:
         uses: ./.github/actions/setup-rust
         with:
           targets: ${{"{{"}} matrix.rust_target {{"}}"}}
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for macOS ${{"{{"}} matrix.arch {{"}}"}}
         run: |
@@ -169,11 +169,11 @@ jobs:
         uses: ./.github/actions/setup-rust
         with:
           targets: ${{"{{"}} matrix.rust_target {{"}}"}}
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for iOS ${{"{{"}} matrix.target {{"}}"}} ${{"{{"}} matrix.arch {{"}}"}}
         run: |
@@ -220,11 +220,11 @@ jobs:
 
       - name: Setup cargo-ndk
         run: cargo install cargo-ndk
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for Android ${{"{{"}} matrix.abi {{"}}"}}
         run: |
@@ -254,11 +254,11 @@ jobs:
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1.13.0
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for Windows
         shell: pwsh
@@ -284,7 +284,7 @@ jobs:
         with:
           name: {{ package_name }}-windows-x86_64
           path: rust/target/x86_64-pc-windows-msvc/release/{{ crate_name }}.dll
-{% if enable_web %}
+{%- if enable_web %}
 
   # ============================================
   # WebAssembly (wasm32)
@@ -303,11 +303,11 @@ jobs:
 
       - name: Install wasm-pack
         run: cargo install wasm-pack
-{% if enable_protoc %}
+{%- if enable_protoc %}
 
       - name: Setup Protoc
         uses: ./.github/actions/setup-protoc
-{% endif %}
+{%- endif %}
 
       - name: Build for WASM
         run: make build-web
@@ -319,7 +319,7 @@ jobs:
           path: |
             rust/target/wasm32/{{ crate_name }}.js
             rust/target/wasm32/{{ crate_name }}_bg.wasm
-{% endif %}
+{%- endif %}
 
   # ============================================
   # Create GitHub Release
@@ -332,9 +332,9 @@ jobs:
       - build-ios
       - build-android
       - build-windows
-{% if enable_web %}
+{%- if enable_web %}
       - build-wasm
-{% endif %}
+{%- endif %}
     if: needs.check-release.outputs.skip != 'true'
     runs-on: ubuntu-latest
     env:
@@ -391,12 +391,12 @@ jobs:
           # iOS simulator x86_64
           tar -czvf release-archives/{{ crate_name }}-${VERSION}-ios-simulator-x86_64.tar.gz \
             -C artifacts/{{ package_name }}-ios-simulator-x86_64 lib{{ crate_name }}.dylib
-{% if enable_web %}
+{%- if enable_web %}
 
           # WebAssembly
           tar -czvf release-archives/{{ crate_name }}-${VERSION}-wasm32.tar.gz \
             -C artifacts/{{ package_name }}-wasm32 {{ crate_name }}.js {{ crate_name }}_bg.wasm
-{% endif %}
+{%- endif %}
 
           # Generate SHA256 checksums
           cd release-archives
@@ -441,9 +441,9 @@ jobs:
           | iOS | device (arm64) | \`{{ crate_name }}-${VERSION}-ios-device-arm64.tar.gz\` |
           | iOS | simulator (arm64) | \`{{ crate_name }}-${VERSION}-ios-simulator-arm64.tar.gz\` |
           | iOS | simulator (x86_64) | \`{{ crate_name }}-${VERSION}-ios-simulator-x86_64.tar.gz\` |
-{% if enable_web %}
+{%- if enable_web %}
           | Web | wasm32 | \`{{ crate_name }}-${VERSION}-wasm32.tar.gz\` |
-{% endif %}
+{%- endif %}
 
           ### Checksums
           SHA256 checksums are available in \`{{ crate_name }}-${VERSION}-checksums.sha256\`
@@ -460,7 +460,7 @@ jobs:
             release-archives/{{ crate_name }}-${VERSION}-ios-device-arm64.tar.gz \
             release-archives/{{ crate_name }}-${VERSION}-ios-simulator-arm64.tar.gz \
             release-archives/{{ crate_name }}-${VERSION}-ios-simulator-x86_64.tar.gz \
-{% if enable_web %}
+{%- if enable_web %}
             release-archives/{{ crate_name }}-${VERSION}-wasm32.tar.gz \
-{% endif %}
+{%- endif %}
             release-archives/{{ crate_name }}-${VERSION}-checksums.sha256

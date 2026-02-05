@@ -44,8 +44,7 @@ Future<void> updateChangelog({
 
   // Parse AI response
   final parsed = jsonDecode(aiResponse) as Map<String, dynamic>;
-  final nativeHighlight =
-      parsed['{{ native_library_name }}_highlight'] as String;
+  final nativeHighlight = parsed['{{ native_library_name }}_highlight'] as String;
   final frbHighlight = parsed['frb_highlight'] as String;
   final changed = parsed['changed'] as String;
   logInfo('Generated {{ native_library_name }} highlight: $nativeHighlight');
@@ -237,8 +236,7 @@ Return ONLY valid JSON, no markdown code blocks.
     }
     // Fallback: return default format
     return jsonEncode({
-      '{{ native_library_name }}_highlight':
-          '**{{ native_library_name }} $version** — upstream library update',
+      '{{ native_library_name }}_highlight': '**{{ native_library_name }} $version** — upstream library update',
       'frb_highlight': '**{{ crate_name }} v$frbVersion** — Rust FFI bindings',
       'changed': content,
     });

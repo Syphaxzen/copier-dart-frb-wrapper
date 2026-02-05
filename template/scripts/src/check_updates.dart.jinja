@@ -184,7 +184,6 @@ Future<Map<String, dynamic>> _fetchLatestRelease() async {
 {%- endif %}
 /// - README.md (badge) - if exists
 /// - CLAUDE.md (example) - if exists (enable_claude=true)
-/// - SKILL.md (example) - if exists (enable_claude=true)
 ///
 /// Returns list of updated file names.
 Future<List<String>> updateVersionFiles({
@@ -273,20 +272,6 @@ Future<List<String>> updateVersionFiles({
     await claudeFile.writeAsString(content);
     updatedFiles.add('CLAUDE.md');
     if (!silent) logInfo('Updated CLAUDE.md example');
-  }
-
-  // 4. Update SKILL.md example (if exists - enable_claude=true)
-  final skillFile = File(
-    '${packageDir.path}/.claude/skills/update-{{ package_name }}/SKILL.md',
-  );
-  if (skillFile.existsSync()) {
-    if (!silent) logStep('Updating SKILL.md...');
-    var content = skillFile.readAsStringSync();
-    // Replace version in example: tag = "vX.Y.Z"
-    content = content.replaceAll('tag = "$oldVersion"', 'tag = "$newVersion"');
-    await skillFile.writeAsString(content);
-    updatedFiles.add('.claude/skills/update-{{ package_name }}/SKILL.md');
-    if (!silent) logInfo('Updated SKILL.md example');
   }
 
   return updatedFiles;

@@ -1,3 +1,27 @@
+## [1.6.0] - 2026-02-05
+
+### Added
+
+- **`get_android_min_sdk.dart` script** — reads `minSdk` from `android/build.gradle` dynamically
+- **Auto-format on generation** — added `dart format .` as post-generation task to ensure all generated Dart code is properly formatted
+
+### Changed
+
+- **`make build-android` reads minSdk dynamically** — no longer hardcoded, reads from `android/build.gradle` via script (single source of truth)
+- **Simplified example app naming:**
+  - Flutter example: `--project-name` changed from `{{ package_name }}_example` to `example`
+  - CLI example: main file changed from `bin/{{ package_name }}_cli.dart` to `bin/main.dart`
+- **Updated `update-{{ package_name }}` skill documentation:**
+  - Updated commands to use `make check-new-{{ package_name }}-version` instead of `make check`
+  - Simplified manual update process documentation
+  - Removed SKILL.md from auto-updated files list (no longer contains version-specific examples)
+- **Improved Jinja2 whitespace handling** — using `{%-` / `-%}` syntax in workflow files to prevent extra blank lines
+- **Removed auto-update of SKILL.md** — `check_updates.dart` no longer updates `.claude/skills/update-{{ package_name }}/SKILL.md`
+
+### Removed
+
+- **Redundant comment in `build.gradle.jinja`** — removed "Native libraries are in src/main/jniLibs/" comment
+
 ## [1.5.0] - 2026-02-04
 
 ### Changed
@@ -256,7 +280,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
-[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.5.0...HEAD
+[Unreleased]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.6.0...HEAD
+[1.6.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.4.0...v1.5.0
 [1.4.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.6...v1.4.0
 [1.3.6]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v1.3.5...v1.3.6

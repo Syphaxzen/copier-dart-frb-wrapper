@@ -186,6 +186,7 @@ setup-protoc:
 	fi
 	@echo "protoc setup complete!"
 {%- endif %}
+
 {%- if enable_web %}
 setup-web:
 	@echo "Installing web build tools..."
@@ -199,6 +200,7 @@ setup-web:
 	@echo ""
 	@echo "Web setup complete!"
 {%- endif %}
+
 # =============================================================================
 # Code Generation
 # =============================================================================
@@ -222,7 +224,8 @@ build:
 
 build-android:
 	@echo "Building Rust library for Android..."
-	cd rust && cargo ndk --platform {{ android_min_sdk }} build --release $(ARGS)
+	@PLATFORM=$$(dart scripts/get_android_min_sdk.dart) && \
+		cd rust && cargo ndk --platform $$PLATFORM build --release $(ARGS)
 	@echo ""
 	@echo "Build complete! Library at: rust/target/<arch>/release/"
 

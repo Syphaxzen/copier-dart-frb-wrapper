@@ -31,7 +31,7 @@ make rust-check
 ```
 
 Common issues:
-- **Removed traits** (e.g., `Ord` for `PublicKey` in v0.87.0)
+- **Removed traits** (e.g., `Ord` for `PublicKey`)
 - **Changed function signatures**
 - **Renamed types**
 
@@ -89,7 +89,7 @@ make rust-check
 
 ```bash
 git add rust/Cargo.toml rust/Cargo.lock rust/src/api/ lib/src/rust/ CHANGELOG.md
-git commit -m "fix(keys): adapt for {{ native_library_name }} vX.Y.Z breaking changes"
+git commit -m "fix: adapt for {{ native_library_name }} vX.Y.Z breaking changes"
 ```
 
 ### Checklist Summary
@@ -110,125 +110,136 @@ git commit -m "fix(keys): adapt for {{ native_library_name }} vX.Y.Z breaking ch
 
 ```bash
 # Check for updates
-make check
+make check-new-{{ package_name }}-version
 
 # Check and apply updates automatically
-make check ARGS="--update"
+make check-new-{{ package_name }}-version ARGS="--update"
 ```
 
 This will:
 1. Check GitHub for latest {{ native_library_name }} release
-2. Update `pubspec.yaml` with new `{{ package_name }}.native_version`
+2. Update `rust/Cargo.toml` with new {{ native_library_name }} dependency tags
+3. Show next steps for completing the update
 
 ## Manual Update Process
 
 ### Step 1: Check Current Version
 
-```bash
-make version
-```
-
-Or check `pubspec.yaml`:
-```yaml
-{{ package_name }}:
-  native_version: "X.Y.Z"  # Current version
+Check `rust/Cargo.toml`:
+```toml
+[dependencies]
+{% if upstream_crate %}{{ upstream_crate }} = { git = "https://github.com/{{ native_repo }}", tag = "{{ upstream_version }}" }{% else %}# upstream crates with tags{% endif %}
 ```
 
 ### Step 2: Update Version
 
-Edit `pubspec.yaml`:
-```yaml
-{{ package_name }}:
-  native_version: "X.Y.Z"  # New version
+Edit `rust/Cargo.toml` and update the tag for upstream crates.
+
+### Step 3: Update Cargo.lock
+
+```bash
+make rust-update
 ```
 
-### Step 3: Regenerate FFI Bindings
+### Step 4: Regenerate FRB Bindings (if API changed)
 
 ```bash
 make codegen
 ```
 
-This downloads the new {{ native_library_name }} headers and regenerates FFI bindings.
-
-### Step 4: Run Tests
+### Step 5: Run Tests
 
 ```bash
 make test
 ```
 
-### Step 5: Commit Changes
+### Step 6: Commit Changes
 
 ```bash
-git add pubspec.yaml lib/src/bindings/ CHANGELOG.md
-git commit -m "Update {{ native_library_name }} to X.Y.Z"
+git add rust/Cargo.toml rust/Cargo.lock
+git commit -m "chore(deps): update {{ native_library_name }} to vX.Y.Z"
 git push
 ```
-
-CI will automatically build native libraries for all platforms.
 
 ## Check Options
 
 ```bash
 # Just check (no changes)
-make check
+make check-new-{{ package_name }}-version
 
 # Check and update
-make check ARGS="--update"
+make check-new-{{ package_name }}-version ARGS="--update"
 
 # Update to specific version
-make check ARGS="--update --version X.Y.Z"
+make check-new-{{ package_name }}-version ARGS="--update --version vX.Y.Z"
 
-# Force update even if already up to date
-make check ARGS="--update --force"
+# Force update even if versions match
+make check-new-{{ package_name }}-version ARGS="--update --force"
 
 # JSON output for CI
-make check ARGS="--ci"
+make check-new-{{ package_name }}-version ARGS="--json"
 ```
 
 ## Version Locations
 
-Files automatically updated by `make check ARGS="--update"`:
+Files automatically updated by `make check-new-{{ package_name }}-version ARGS="--update"`:
 
 | File | What | Description |
 |------|------|-------------|
-| `pubspec.yaml` | native_version | Native library version |
+| `rust/Cargo.toml` | upstream tags | Native library dependency version |
 | `README.md` | Badge | Version badge in header |
 | `CLAUDE.md` | Example | Code example in documentation |
-| `.claude/skills/update-{{ package_name }}/SKILL.md` | Example | Code example in skill |
 
 Files that need manual update:
 
 | File | What | Description |
 |------|------|-------------|
-| `pubspec.yaml` | `version` | Dart package version (bump if needed) |
-| `CHANGELOG.md` | Entry | Document the version change |
+| `rust/Cargo.toml` | `version` | Rust crate version (bump patch for deps update) |
+| `rust/Cargo.lock` | Dependencies | Run `make rust-update` after changing Cargo.toml |
+| `CHANGELOG.md` | Entry | Document the {{ native_library_name }} version change |
 
-## After CI Builds
+## Breaking Changes to Watch For
 
-When CI completes after pushing:
+### API Changes
+- New functions in upstream crate
+- Removed functions
+- Changed function signatures
+- New struct fields
 
-1. Native libraries are built for all platforms
-2. Artifacts are combined
-3. SHA256 checksums created for verification
-4. GitHub Release created with assets
+### Behavior Changes
+- Protocol version updates
+- New cryptographic algorithms
+- Changed error types
+
+### Binding Regeneration
+
+After updating, if API changed, run:
+```bash
+make codegen
+```
+
+Then check for:
+- Compilation errors in `rust/src/api/` files
+- Missing functions that your code depends on
+- Changed function signatures
 
 ## Troubleshooting
 
 ### "No updates available"
 - You're already on the latest version
-- Check https://github.com/{{ github_repo }}/releases
+- Check https://github.com/{{ native_repo }}/releases
 
-### "Binding generation failed"
+### "Cargo build failed"
 - New {{ native_library_name }} version may have breaking API changes
 - Check {{ native_library_name }} release notes
-- May need to update wrapper code in `lib/src/`
+- May need to update Rust wrapper code in `rust/src/api/`
 
 ### Tests fail after update
 - API may have changed
-- Check if function signatures changed
+- Protocol version may have changed
 - Review {{ native_library_name }} changelog for breaking changes
 
 ## Upstream Resources
 
-- [{{ native_library_name }} Releases](https://github.com/{{ github_repo }}/releases)
-- [{{ native_library_name }} Repository](https://github.com/{{ github_repo }})
+- [{{ native_library_name }} Releases](https://github.com/{{ native_repo }}/releases)
+- [{{ native_library_name }} Repository](https://github.com/{{ native_repo }})
