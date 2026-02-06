@@ -28,7 +28,7 @@ on:
       - 'rust/**'
       - 'pubspec.yaml'
   workflow_run:
-    workflows: ["Build {{ package_name }} Native Libraries"]
+    workflows: ["Build {{ package_name }} FRB Libraries"]
     types:
       - completed
 
