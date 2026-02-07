@@ -428,8 +428,9 @@ jobs:
 
           Pre-built Flutter Rust Bridge native libraries for all supported platforms.
           **These archives are downloaded automatically by \`hook/build.dart\` during Dart/Flutter builds.**
+
 {%- if upstream_crates %}
-          Based on {{ native_library_name }} ${NATIVE_VERSION}.
+          **Based on [{{ native_library_name }} ${NATIVE_VERSION}](https://github.com/{{ native_repo }}/releases/tag/${NATIVE_VERSION})**
 {%- endif %}
 
           ### Platforms
