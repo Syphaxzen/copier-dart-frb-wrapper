@@ -153,7 +153,7 @@ enable_protoc:
 # -----------------------------------------------------------------------------
 enable_claude:
   type: bool
-  help: "Include Claude Code configuration (CLAUDE.md, .claude/skills/)"
+  help: "Include Claude Code configuration (CLAUDE.md, .claude/skills/, .claude/commands/)"
   default: true
 
 # -----------------------------------------------------------------------------
