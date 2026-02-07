@@ -1,3 +1,14 @@
+## [2.2.3] - 2026-02-07
+
+### Removed
+
+- **`prepare-release` Claude command** — redundant; the `release-package` Claude skill already covers this functionality
+- **`update-template` Claude command** — redundant; the `update-template` Claude skill already covers this functionality
+
+### Changed
+
+- **`CLAUDE.md.jinja`** — replaced "Claude Commands" section with "Claude Skills" section
+
 ## [2.2.2] - 2026-02-07
 
 ### Fixed
@@ -395,6 +406,8 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
+[2.2.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.1.1...v2.2.0
 [2.1.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.1.0...v2.1.1
