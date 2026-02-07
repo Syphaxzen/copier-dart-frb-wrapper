@@ -1,3 +1,9 @@
+## [2.0.1] - 2026-02-07
+
+### Changed
+
+- **`template/{{ _copier_conf.answers_file }}.jinja`** - remove comment
+
 ## [2.0.0] - 2026-02-07
 
 ### Changed (BREAKING)
