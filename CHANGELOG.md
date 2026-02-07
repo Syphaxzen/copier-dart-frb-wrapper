@@ -1,3 +1,9 @@
+## [2.2.2] - 2026-02-07
+
+### Fixed
+
+- **`platform_io.dart.jinja`** — added `coverage:ignore` annotations for untestable platform code (AOT mode library loading, `openLibraryFromPath`)
+
 ## [2.2.1] - 2026-02-07
 
 ### Fixed
