@@ -46,21 +46,10 @@ void main() {
 
 ## Platform Support
 
-| Platform | Architecture | Status |
-|----------|--------------|--------|
-| Android  | arm64-v8a    | ✅ |
-| Android  | armeabi-v7a  | ✅ |
-| Android  | x86_64       | ✅ |
-| iOS      | arm64        | ✅ |
-| iOS Sim  | arm64        | ✅ |
-| iOS Sim  | x86_64       | ✅ |
-| macOS    | arm64        | ✅ |
-| macOS    | x86_64       | ✅ |
-| Linux    | x86_64       | ✅ |
-| Linux    | arm64        | ✅ |
-| Windows  | x86_64       | ✅ |
-{% if enable_web %}| Web      | WASM         | ✅ |
-{% endif %}
+|             | Android | iOS   | macOS  | Linux      | Windows |{% if enable_web %} Web |{% endif %}
+|-------------|---------|-------|--------|------------|---------|{% if enable_web %}-----|{% endif %}
+| **Support** | SDK {{ android_min_sdk }}+ | {{ ios_min_version }}+ | {{ macos_min_version }}+ | arm64, x64 | x64     |{% if enable_web %} WASM |{% endif %}
+| **Arch**    | arm64, armv7, x64 | arm64 | arm64, x64 | arm64, x64 | x64 |{% if enable_web %} wasm32 |{% endif %}
 
 ## Development
 

@@ -1,3 +1,9 @@
+## [2.3.2] - 2026-02-08
+
+### Changed
+
+- **`README.md.jinja`** — replaced vertical platform support table (one row per architecture) with compact horizontal layout showing platforms as columns with **Support** and **Arch** rows
+
 ## [2.3.1] - 2026-02-08
 
 ### Changed
@@ -421,6 +427,7 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
+[2.3.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.3.1...v2.3.2
 [2.3.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.2...v2.2.3
