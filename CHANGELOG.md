@@ -1,3 +1,12 @@
+## [2.3.1] - 2026-02-08
+
+### Changed
+
+- **`frb-patterns` Claude skill** — improved FRB patterns documentation with additional patterns from real-world usage:
+  - Added anti-pattern example (`❌ WRONG`) to Constructor-Style API Pattern section showing incorrect top-level function vs correct `impl` block approach
+  - Added "Adapter Pattern for Upstream Traits" subsection with generic `StoreAdapter` example for bridging DartFn callbacks to upstream trait implementations via `#[async_trait(?Send)]`
+  - Added "No Threading on WASM" warning about `parking_lot::Mutex` and single-threaded web constraints
+
 ## [2.3.0] - 2026-02-08
 
 ### Changed
@@ -412,6 +421,7 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
+[2.3.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.3.0...v2.3.1
 [2.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.1...v2.2.2

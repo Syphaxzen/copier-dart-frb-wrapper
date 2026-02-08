@@ -3,208 +3,296 @@ name: frb-patterns
 description: Flutter Rust Bridge patterns and best practices for this project. Use when writing Rust API code, adding new bindings, implementing DartFn callbacks, or troubleshooting FRB issues.
 ---
 
-# FFI Patterns for {{ package_name }}
+# FRB Patterns for {{ package_name }}
 
-Patterns and templates for writing correct Dart FFI code in this project.
+Patterns and templates for writing correct Flutter Rust Bridge code in this project.
 
-## Memory Allocation
+## Architecture Overview
 
-### Allocate Bytes
+```
+┌─────────────────────────────────────────────────┐
+│     Upstream Rust crate                         │  Core implementation
+├─────────────────────────────────────────────────┤
+│       rust/src/api/*.rs (Rust wrappers)         │  FRB-annotated functions
+├─────────────────────────────────────────────────┤
+│      lib/src/rust/*.dart (FRB generated)        │  Auto-generated Dart API
+├─────────────────────────────────────────────────┤
+│           Your Dart application code            │  Uses the API
+└─────────────────────────────────────────────────┘
+```
 
-```dart
-final ptr = {{ package_name | to_camel }}Utils.allocateBytes(length);
-try {
-  // Use ptr...
-} finally {
-  {{ package_name | to_camel }}Utils.freePointer(ptr);  // or secureFreePointer for secrets
+## Constructor-Style API Pattern
+
+Use `impl` blocks for constructors so FRB generates idiomatic Dart:
+
+```rust
+#[frb(opaque)]
+pub struct MyType {
+    pub(crate) native: upstream_crate::MyType,
 }
-```
 
-### Convert Uint8List to Pointer
-
-```dart
-final ptr = {{ package_name | to_camel }}Utils.uint8ListToPointer(data);
-try {
-  // Use ptr...
-} finally {
-  {{ package_name | to_camel }}Utils.freePointer(ptr);
-}
-```
-
-### Convert Pointer to Uint8List
-
-```dart
-final result = {{ package_name | to_camel }}Utils.pointerToUint8List(ptr, length);
-// Result is a copy - safe to free ptr after this
-```
-
-## String Handling
-
-```dart
-final namePtr = algorithmName.toNativeUtf8();
-try {
-  final result = bindings.some_native_function(namePtr.cast());
-  // ...
-} finally {
-  {{ package_name | to_camel }}Utils.freePointer(namePtr);
-}
-```
-
-## Wrapper Class Pattern
-
-```dart
-// Finalizer for automatic cleanup
-final Finalizer<Pointer<bindings.NativeStruct>> _structFinalizer = Finalizer(
-  (ptr) => bindings.native_struct_free(ptr),
-);
-
-class WrapperClass {
-  late final Pointer<bindings.NativeStruct> _ptr;
-  bool _disposed = false;
-
-  WrapperClass._(this._ptr) {
-    // Attach finalizer for GC cleanup
-    _structFinalizer.attach(this, _ptr, detach: this);
-  }
-
-  void _checkDisposed() {
-    if (_disposed) {
-      throw StateError('Instance has been disposed');
+impl MyType {
+    // Generates MyType.create() in Dart
+    #[flutter_rust_bridge::frb(sync)]
+    pub fn create(param: String) -> Result<MyType, String> {
+        let native = upstream_crate::MyType::new(&param)
+            .map_err(|e| e.to_string())?;
+        Ok(MyType { native })
     }
-  }
 
-  // Factory constructor
-  static WrapperClass create(String name) {
-    {{ package_name | to_camel }}Base.init();  // Auto-initialize library
-
-    final namePtr = name.toNativeUtf8();
-    try {
-      final ptr = bindings.native_struct_new(namePtr.cast());
-      if (ptr == nullptr) {
-        throw {{ package_name | to_camel }}Exception('Failed to create instance');
-      }
-      return WrapperClass._(ptr);
-    } finally {
-      {{ package_name | to_camel }}Utils.freePointer(namePtr);
+    // Generates myType.serialize() in Dart
+    #[flutter_rust_bridge::frb(sync)]
+    pub fn serialize(&self) -> Vec<u8> {
+        self.native.serialize().to_vec()
     }
-  }
+}
+```
 
-  // Dispose pattern
-  void dispose() {
-    if (!_disposed) {
-      bindings.native_struct_free(_ptr);  // 1. Free native memory
-      _structFinalizer.detach(this);       // 2. Detach finalizer
-      _disposed = true;                     // 3. Set flag
+```rust
+// ❌ WRONG - generates myTypeCreate() as a top-level function in Dart
+pub fn my_type_create(param: String) -> Result<MyType, String> { ... }
+```
+
+**Dart usage:**
+```dart
+final obj = MyType.create(param: 'value');  // Constructor-style
+final bytes = obj.serialize();               // Method
+```
+
+## Opaque Type Pattern
+
+Wrap upstream types in opaque structs to keep them in Rust:
+
+```rust
+#[frb(opaque)]
+pub struct MyType {
+    pub(crate) native: upstream_crate::MyType,
+}
+
+impl MyType {
+    // Access native type internally
+    pub(crate) fn native(&self) -> &upstream_crate::MyType {
+        &self.native
     }
-  }
 }
 ```
 
-## Data Class with Secrets
+FRB manages the lifecycle automatically - no `dispose()` needed in Dart.
 
-```dart
-final Finalizer<Uint8List> _secretFinalizer = Finalizer((data) {
-  {{ package_name | to_camel }}Utils.zeroMemory(data);
-});
+## Transparent Struct Pattern
 
-class KeyPair {
-  final Uint8List publicKey;
-  final Uint8List secretKey;
+For data types that cross FFI as plain values:
 
-  KeyPair({required this.publicKey, required this.secretKey}) {
-    // Auto-zero secret on GC (defense-in-depth)
-    _secretFinalizer.attach(this, secretKey, detach: this);
-  }
+```rust
+pub struct MyResult {
+    pub data: Vec<u8>,
+    pub count: u32,
+}
 
-  /// Zero secrets immediately (recommended)
-  void clearSecrets() {
-    {{ package_name | to_camel }}Utils.zeroMemory(secretKey);
-  }
-
-  /// Safe: only exposes public key
-  String get publicKeyBase64 => base64Encode(publicKey);
-
-  /// **Security Warning:** Exports SECRET KEY in plaintext!
-  Map<String, String> toStrings() {
-    return {
-      'publicKey': base64Encode(publicKey),
-      'secretKey': base64Encode(secretKey),
-    };
-  }
+pub enum MyEnum {
+    OptionA,
+    OptionB,
+    OptionC,
 }
 ```
 
-## Calling Native Functions
+FRB generates Dart classes/enums with constructors automatically.
 
-### From Struct Field
+## DartFn Callbacks for Store Operations
 
-```dart
-// 1. Validate function pointer
-if (_ptr.ref.someFunction == nullptr) {
-  throw {{ package_name | to_camel }}Exception('Function pointer is null');
-}
+For operations requiring Dart store callbacks:
 
-// 2. Convert to Dart function
-final fn = _ptr.ref.someFunction.asFunction<
-  int Function(Pointer<Uint8> input, Pointer<Uint8> output)
->();
-
-// 3. Allocate output buffers
-final input = {{ package_name | to_camel }}Utils.uint8ListToPointer(inputData);
-final output = {{ package_name | to_camel }}Utils.allocateBytes(outputLength);
-
-try {
-  // 4. Call function
-  final result = fn(input, output);
-
-  if (result != 0) {
-    throw {{ package_name | to_camel }}Exception('Operation failed', result);
-  }
-
-  // 5. Copy results to Dart
-  return {{ package_name | to_camel }}Utils.pointerToUint8List(output, outputLength);
-} finally {
-  // 6. Free native memory (secure for secrets!)
-  {{ package_name | to_camel }}Utils.freePointer(input);
-  {{ package_name | to_camel }}Utils.secureFreePointer(output, outputLength);
+```rust
+pub async fn operation_with_storage(
+    data: Vec<u8>,
+    // Store callbacks
+    storage_read: impl Fn(Vec<u8>) -> DartFnFuture<Option<Vec<u8>>> + Send + Sync + 'static,
+    storage_write: impl Fn(Vec<u8>, Vec<u8>) -> DartFnFuture<()> + Send + Sync + 'static,
+) -> Result<Vec<u8>, String> {
+    // Use callbacks to access Dart-side storage
+    let stored = storage_read(key).await;
+    storage_write(key, value).await;
+    Ok(result)
 }
 ```
 
-### Direct Library Call
+### Bridging Sync Traits to Async Callbacks
 
-```dart
-final count = bindings.some_count_function();  // Simple - no cleanup needed
+If the upstream crate has sync trait methods but DartFn is async, use `futures::executor::block_on()`:
 
-final namePtr = bindings.get_name(i);
-if (namePtr != nullptr) {
-  final name = namePtr.cast<Utf8>().toDartString();
-  // Don't free namePtr - it's a static string from library
+```rust
+// In Cargo.toml: futures = "0.3"
+
+fn sync_trait_method(&self) -> Result<(), Error> {
+    futures::executor::block_on((self.callback)(data));
+    Ok(())
+}
+```
+
+This works because FRB runs Rust functions on separate threads, not the Dart isolate.
+
+### Adapter Pattern for Upstream Traits
+
+If the upstream crate defines traits (e.g., for storage), create adapter structs that bridge DartFn callbacks to trait implementations:
+
+```rust
+struct StoreAdapter<L, S>
+where
+    L: Fn(Vec<u8>) -> DartFnFuture<Option<Vec<u8>>> + Send + Sync + 'static,
+    S: Fn(Vec<u8>, Vec<u8>) -> DartFnFuture<()> + Send + Sync + 'static,
+{
+    load: L,
+    store: S,
+}
+
+#[async_trait(?Send)]
+impl<L, S> upstream_crate::Store for StoreAdapter<L, S>
+where
+    L: Fn(Vec<u8>) -> DartFnFuture<Option<Vec<u8>>> + Send + Sync + 'static,
+    S: Fn(Vec<u8>, Vec<u8>) -> DartFnFuture<()> + Send + Sync + 'static,
+{
+    async fn load(&self, key: &[u8]) -> Result<Option<Vec<u8>>, Error> {
+        Ok((self.load)(key.to_vec()).await)
+    }
+
+    async fn store(&mut self, key: &[u8], value: &[u8]) -> Result<(), Error> {
+        (self.store)(key.to_vec(), value.to_vec()).await;
+        Ok(())
+    }
+}
+```
+
+This lets Dart-side store implementations satisfy Rust trait requirements via callbacks.
+
+## Sync vs Async Functions
+
+### Sync Functions (simple, no callbacks)
+
+```rust
+impl MyType {
+    #[flutter_rust_bridge::frb(sync)]  // Mark as sync
+    pub fn serialize(&self) -> Vec<u8> {
+        self.native.serialize().to_vec()
+    }
+}
+```
+
+### Async Functions (with callbacks or complex operations)
+
+```rust
+// No #[frb(sync)] - FRB generates Future<T> in Dart
+pub async fn process_with_storage(
+    data: Vec<u8>,
+    storage_read: impl Fn(Vec<u8>) -> DartFnFuture<Option<Vec<u8>>> + Send + Sync + 'static,
+    // ...
+) -> Result<Vec<u8>, String> {
+    // async implementation
 }
 ```
 
 ## Error Handling
 
-```dart
-try {
-  final result = nativeFunction(args);
-  if (result != 0) {
-    throw {{ package_name | to_camel }}Exception('Operation failed', result);
-  }
-} on {{ package_name | to_camel }}Exception {
-  rethrow;  // Preserve our exceptions
-} catch (e) {
-  throw {{ package_name | to_camel }}Exception('Unexpected error: $e');
+Convert upstream errors to String for FRB:
+
+```rust
+pub fn deserialize(bytes: Vec<u8>) -> Result<Self, String> {
+    upstream_crate::MyType::deserialize(&bytes)
+        .map(|native| MyType { native })
+        .map_err(|e| e.to_string())
 }
 ```
 
-## Utilities Reference
+FRB automatically converts `Result<T, String>` to Dart exceptions.
 
-| Method | Use For |
-|--------|---------|
-| `{{ package_name | to_camel }}Utils.allocateBytes(n)` | Allocate n bytes |
-| `{{ package_name | to_camel }}Utils.freePointer(ptr)` | Free non-sensitive memory |
-| `{{ package_name | to_camel }}Utils.secureFreePointer(ptr, len)` | Free sensitive memory (zeros first) |
-| `{{ package_name | to_camel }}Utils.uint8ListToPointer(list)` | Copy Dart list to native |
-| `{{ package_name | to_camel }}Utils.pointerToUint8List(ptr, len)` | Copy native to Dart list |
-| `{{ package_name | to_camel }}Utils.zeroMemory(list)` | Zero a Dart Uint8List |
-| `{{ package_name | to_camel }}Utils.constantTimeEquals(a, b)` | Compare secrets safely |
+## Memory Management
+
+**FRB handles cleanup automatically via Rust's ownership system.**
+
+- No manual `dispose()` needed in Dart
+- No finalizers to register
+- No double-free concerns
+- Opaque types are dropped when Dart GC collects them
+
+```dart
+// Dart - no cleanup needed!
+final key = MyType.create(param: 'value');
+final bytes = key.serialize();
+// key is automatically cleaned up when no longer referenced
+```
+
+## Vec<u8> for Serialization
+
+Use `Vec<u8>` for all serialized data crossing FFI boundary:
+
+```rust
+// Serialize returns Vec<u8>
+pub fn serialize(&self) -> Vec<u8> {
+    self.native.serialize().to_vec()
+}
+
+// Deserialize takes Vec<u8> (or List<int> in Dart)
+pub fn deserialize(bytes: Vec<u8>) -> Result<Self, String> {
+    // ...
+}
+```
+
+## Regenerating Bindings
+
+After modifying Rust code in `rust/src/api/`:
+
+```bash
+make codegen
+```
+
+This runs `flutter_rust_bridge_codegen generate` using `flutter_rust_bridge.yaml` config.
+
+**When to regenerate:**
+- After modifying any `pub fn` or `pub async fn` in `rust/src/api/`
+- After changing struct/enum definitions
+- After updating upstream crate version (if API changed)
+
+## Common Issues
+
+### "method not found" after codegen
+
+- Check that the method is `pub`
+- Check that return types are supported by FRB
+- Run `make codegen` after any Rust changes
+
+### Callback lifetime issues
+
+Ensure callbacks have `Send + Sync + 'static`:
+
+```rust
+callback: impl Fn(Vec<u8>) -> DartFnFuture<Option<Vec<u8>>> + Send + Sync + 'static,
+```
+
+### Type not transferable
+
+Use `Vec<u8>` for complex types instead of trying to pass upstream types directly across FFI.
+
+### `block_on` panics
+
+`futures::executor::block_on()` requires a non-async context. This works because FRB runs Rust functions on separate threads. Do NOT call storage callbacks from an async Rust context without `block_on`.
+
+## Web/WASM Considerations
+
+FRB handles web platform differences automatically, but keep in mind:
+
+### RNG on Web
+The `getrandom` crate uses Web Crypto API on WASM.
+Configuration in `rust/.cargo/config.toml`:
+```toml
+[target.wasm32-unknown-unknown]
+rustflags = ['--cfg', 'getrandom_backend="wasm_js"']
+```
+
+### No Threading on WASM
+- Avoid `parking_lot::Mutex` in hot paths on web
+- Use single-threaded alternatives when possible
+- FRB handles this automatically for most cases
+
+### Building WASM
+```bash
+make build-web
+```
