@@ -1,3 +1,9 @@
+## [2.3.0] - 2026-02-08
+
+### Changed
+
+- **`macos_min_version` default**: `10.14` → `10.15`
+
 ## [2.2.3] - 2026-02-07
 
 ### Removed
@@ -406,6 +412,7 @@
 - Security policy template
 - Git hooks for pre-commit checks
 
+[2.3.0]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.3...v2.3.0
 [2.2.3]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.2...v2.2.3
 [2.2.2]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.1...v2.2.2
 [2.2.1]: https://github.com/djx-y-z/copier-dart-frb-wrapper/compare/v2.2.0...v2.2.1

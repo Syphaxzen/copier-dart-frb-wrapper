@@ -95,7 +95,7 @@ rm -rf /tmp/test_full && copier copy . /tmp/test_full \
 - `dart_sdk_version` - Dart SDK constraint (default: "^3.10.0")
 - `flutter_sdk_version` - Flutter SDK constraint (default: ">=3.38.0")
 - `ios_min_version` - iOS minimum deployment target (default: "13.0")
-- `macos_min_version` - macOS minimum deployment target (default: "10.14")
+- `macos_min_version` - macOS minimum deployment target (default: "10.15")
 - `android_min_sdk` - Android min SDK (default: "21")
 - `android_compile_sdk` - Android compile SDK (default: "34")
 - `license` - MIT, Apache-2.0, etc. (default: "MIT")

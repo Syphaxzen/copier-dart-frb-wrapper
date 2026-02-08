@@ -188,7 +188,7 @@ ios_min_version:
 macos_min_version:
   type: str
   help: "macOS minimum deployment target"
-  default: "10.14"
+  default: "10.15"
 
 # -----------------------------------------------------------------------------
 # Android config
